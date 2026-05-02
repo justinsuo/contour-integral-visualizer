@@ -84,10 +84,74 @@
   .head-row { display: flex; align-items: baseline; gap: 14px; margin-bottom: 6px; }
   .nums { font-family: ui-monospace, Menlo, monospace; }
   .footer-note { color: var(--muted); font-size: 12px; margin-top: 8px; }
+
+  /* tabs */
+  header.site { margin-bottom: 18px; }
+  .site-eyebrow { color: var(--muted); font-size: 12px; letter-spacing: .15em;
+    text-transform: uppercase; margin: 0 0 6px; font-weight: 500; }
+  .site-title { font-size: 30px; margin: 0; letter-spacing: -.02em; }
+  .site-sub { color: var(--muted); margin: 6px 0 0; font-size: 14px; }
+  .tabs { display: flex; gap: 0; margin: 22px 0 24px; border-bottom: 1px solid var(--line);
+    flex-wrap: wrap; }
+  .tab { background: transparent; border: 0; border-bottom: 2px solid transparent;
+    padding: 12px 18px; color: var(--muted); cursor: pointer; font-size: 14px;
+    font-family: inherit; border-radius: 0; transition: all .15s; }
+  .tab:hover { color: var(--ink); border-bottom-color: var(--line2); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* draggable canvases */
+  .canvas-host.drag canvas { cursor: crosshair; }
+
+  /* quiz */
+  .quiz-q { margin: 0 0 14px; padding: 14px 16px; background: var(--bg2);
+    border: 1px solid var(--line); border-radius: 10px; }
+  .quiz-q .q-text { margin: 0 0 10px; font-size: 14px; color: var(--ink); }
+  .quiz-options { display: flex; gap: 8px; flex-wrap: wrap; }
+  .quiz-opt { font-family: ui-monospace, Menlo, monospace; font-size: 13px;
+    padding: 8px 12px; }
+  .quiz-opt.correct { background: #15331f; color: var(--good); border-color: var(--good); }
+  .quiz-opt.wrong { background: #331a1a; color: var(--bad); border-color: var(--bad); }
+  .quiz-explain { display: none; color: #cfd4df; margin-top: 12px; font-size: 13px;
+    padding: 10px 12px; background: #0f1219; border: 1px solid var(--line);
+    border-radius: 6px; line-height: 1.55; }
+  .quiz-explain.show { display: block; }
+  .quiz-score { font-family: ui-monospace, Menlo, monospace; color: var(--accent2);
+    font-size: 14px; padding: 10px 14px; background: var(--bg2);
+    border: 1px solid var(--line2); border-radius: 8px; display: inline-block; margin-top: 6px; }
+
+  /* readout grid */
+  .readout { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 13px; color: #cfd4df;
+    background: var(--bg2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 14px; }
+  .readout dt { color: var(--muted); margin: 0; }
+  .readout dd { margin: 0; color: var(--good); }
+  .readout dd.alt { color: var(--accent2); }
+  .readout dd.alt2 { color: var(--accent); }
+  .reveal-step { background: var(--bg2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 14px; margin: 8px 0; }
+  .reveal-step summary { color: var(--accent); }
 </style>
 </head>
 <body>
 <div class="wrap">
+
+<!-- ─── SITE HEADER ─── -->
+<header class="site">
+  <p class="site-eyebrow">Complex analysis · interactive exercises</p>
+  <h1 class="site-title">Contour integral problems</h1>
+  <p class="site-sub">Pick a problem. Drag, scrub, animate, play.</p>
+</header>
+
+<nav class="tabs" id="tabnav">
+  <button class="tab active" data-tab="p1">Problem 1 &nbsp;·&nbsp; ∫<sub>C</sub> (z+2)/z dz</button>
+  <button class="tab" data-tab="p2">Problem 2 &nbsp;·&nbsp; ∫<sub>C</sub> z<sup>i</sup> dz</button>
+</nav>
+
+
+<div id="p1" class="tab-content active">
 
 <!-- ─── HERO ─── -->
 <h1>Contour integral on the lower semicircle of radius 2</h1>
@@ -328,6 +392,293 @@
     <li><b>Total: $4 + 2\pi i$.</b></li>
   </ul>
 </section>
+
+</div><!-- /p1 -->
+
+
+<div id="p2" class="tab-content">
+
+<!-- ─── HERO ─── -->
+<h1>Power function on the upper semicircle</h1>
+<p class="lede">
+  Problem 2. $f(z) = z^i = e^{i\,\mathrm{Log}\,z}$ — the <b>principal branch</b> of the power
+  function, with $\arg z \in (-\pi, \pi)$. Let $C$: $z(\theta) = e^{i\theta}$, $\theta \in [0, \pi]$.
+  Evaluate $\displaystyle\int_C f(z)\,dz$.
+  <span style="display:block; margin-top:6px"><i>Hint: explain why the integral is well-defined
+  even though $f$ is not defined at $\theta = \pi$.</i></span>
+</p>
+<div class="answer-banner">
+  Answer: $\displaystyle\int_C z^i\,dz = \tfrac{1+e^{-\pi}}{2}(i-1) \approx -0.5216 + 0.5216\,i$
+</div>
+
+
+<!-- ────────── A. z^i PLAYGROUND ────────── -->
+<section class="card">
+  <h3>Concept 1 · the integrand</h3>
+  <h2>What does $z^i$ even mean? An interactive playground</h2>
+  <p>By definition, $z^i = e^{i\,\mathrm{Log}\,z}$. Plug in $\mathrm{Log}\,z = \ln|z| + i\arg z$:</p>
+  <p>$$z^i = e^{i(\ln|z| + i\arg z)} = e^{-\arg z}\cdot e^{i\ln|z|}.$$</p>
+  <p>So
+    <span class="pill">$|z^i| = e^{-\arg z}$</span> &nbsp;(magnitude depends only on the angle of $z$)
+    and
+    <span class="pill">$\arg(z^i) = \ln|z|$</span> &nbsp;(angle depends only on the magnitude of $z$).
+    Drag the dot to feel it out.</p>
+  <div class="grid2">
+    <div>
+      <div class="canvas-host drag">
+        <canvas id="zi-canvas" width="500" height="500"></canvas>
+      </div>
+      <div class="canvas-label">drag to set $z$ &nbsp;·&nbsp; backdrop = domain coloring of $z^i$</div>
+    </div>
+    <div>
+      <dl class="readout">
+        <dt>z</dt>                  <dd id="zi-z" class="alt2">1.000 + 0.000 i</dd>
+        <dt>|z|</dt>                <dd id="zi-mag">1.000</dd>
+        <dt>arg z</dt>              <dd id="zi-arg">0.000 rad</dd>
+        <dt>───</dt>                <dd>───</dd>
+        <dt>z<sup>i</sup></dt>      <dd id="zi-out" class="alt">1.000 + 0.000 i</dd>
+        <dt>|z<sup>i</sup>|</dt>    <dd id="zi-out-mag">1.000 = e<sup>−arg z</sup></dd>
+        <dt>arg(z<sup>i</sup>)</dt> <dd id="zi-out-arg">0.000 = ln|z|</dd>
+      </dl>
+      <p style="margin-top: 16px"><b>Try this.</b> Drag $z$ exactly onto the unit circle (radius 1).
+        Watch $\arg(z^i)$ snap to $0$ — <b>$z^i$ is purely real on the unit circle</b>, and shrinks
+        from $1$ down to $e^{-\pi} \approx 0.043$ as you sweep $\arg z$ from $0$ up to $\pi$.</p>
+      <p><b>And:</b> drag $z$ across the negative real axis. The principal value flips by
+        $e^{\pm 2\pi}$ — that's the branch cut. The next section explains what's going on there.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ────────── B. BRANCH CUT + WHY WELL-DEFINED ────────── -->
+<section class="card">
+  <h3>Concept 2 · the branch cut</h3>
+  <h2>Why $f$ is undefined at $z=-1$, and why the integral is fine anyway</h2>
+  <p>The principal branch picks $\arg z \in (-\pi, \pi)$ — so the negative real axis is the
+     <b>branch cut</b>. Approaching it from above ($\arg \to \pi^-$) and from below
+     ($\arg \to -\pi^+$) gives values $2\pi$ apart, so $\mathrm{Log}\,z$ is discontinuous there.
+     The point $z=-1$ on $C$ corresponds to $\theta=\pi$ — exactly on the cut, so $f(-1)$ isn't
+     defined by the principal branch.</p>
+  <p>But the integral is still well-defined, because $|f|$ stays bounded on the entire upper
+     semicircle:</p>
+  <p>$$|f(e^{i\theta})| = e^{-\theta}, \qquad e^{-\pi} \le |f(e^{i\theta})| \le 1.$$</p>
+  <p>A bounded integrand with one missing value (a single point — measure zero!) is integrable.
+     The limit $\lim_{\theta\to\pi^-} f(e^{i\theta}) = -e^{-\pi}$ exists, so we just integrate
+     using the continuous extension. <i>That's the resolution of the hint.</i></p>
+  <div class="canvas-host" style="margin-top: 14px">
+    <canvas id="bound-plot" width="900" height="320"></canvas>
+  </div>
+  <div class="canvas-label">$|f(e^{i\theta})|$ on $C$ &nbsp;·&nbsp; bounded between $e^{-\pi}$ and $1$, finite limit at $\theta=\pi$</div>
+</section>
+
+
+<!-- ────────── C. f ON THE UNIT CIRCLE ────────── -->
+<section class="card">
+  <h3>Concept 3 · $f$ along the contour</h3>
+  <h2>$f(z(\theta)) = e^{-\theta}$ — a real, shrinking number</h2>
+  <p>Substitute $z = e^{i\theta}$ into $f$. On the unit circle $\ln|z|=0$, and for
+     $\theta\in[0,\pi)$ the principal $\mathrm{Log}\,z$ is just $i\theta$. So:</p>
+  <p>$$f(z) = e^{i\,\mathrm{Log}\,z} = e^{i\cdot i\theta} = e^{-\theta}.$$</p>
+  <p>Sweep $\theta$ from $0$ to $\pi$. The point on $C$ moves up and around to $-1$, while $f(z)$
+     marches down the real axis from $1$ toward $e^{-\pi}$ — never leaving the real line.</p>
+  <div class="grid2">
+    <div>
+      <div class="canvas-host"><canvas id="uc-z" width="380" height="380"></canvas></div>
+      <div class="canvas-label">$z = e^{i\theta}$ on the upper semicircle</div>
+    </div>
+    <div>
+      <div class="canvas-host"><canvas id="uc-f" width="380" height="380"></canvas></div>
+      <div class="canvas-label">$f(z) = e^{-\theta}$ &nbsp;·&nbsp; real-axis crawler</div>
+    </div>
+  </div>
+  <div class="row" style="margin-top: 14px">
+    <span class="badge">θ&nbsp;=&nbsp;<span id="uc-th" class="num">0.000</span></span>
+    <span class="badge">z&nbsp;=&nbsp;<span id="uc-zlab" class="num3">1.000 + 0.000 i</span></span>
+    <span class="badge">f(z)&nbsp;=&nbsp;<span id="uc-flab" class="num2">1.000 + 0.000 i</span></span>
+  </div>
+  <input id="uc-slider" type="range" min="0" max="1000" value="0" style="margin-top: 10px" />
+  <div class="footer-note">Notice the right panel never leaves the real axis. That's the surprise
+    of $z^i$ on $|z|=1$.</div>
+</section>
+
+
+<!-- ────────── D. SYNCED TRIPLE PANEL ────────── -->
+<section class="card">
+  <h3>The integral, accumulating</h3>
+  <h2>Three views, one playhead</h2>
+  <p style="color:var(--muted); margin: 4px 0 14px">
+    Left: $z(\theta)$ on the upper semicircle. Middle: $f(z) = e^{-\theta}$ (the image is just a
+    real-axis segment from $1$ to $e^{-\pi}$). Right: the running integral
+    $\int_0^\theta f\,dz$ — a path in the complex plane that lands on the green target
+    $\tfrac{1+e^{-\pi}}{2}(i-1) \approx -0.522 + 0.522 i$.
+  </p>
+  <div class="grid3">
+    <div>
+      <div class="canvas-host"><canvas id="p2z3" width="380" height="380"></canvas></div>
+      <div class="canvas-label">$z$-plane &nbsp;·&nbsp; contour $C$</div>
+    </div>
+    <div>
+      <div class="canvas-host"><canvas id="p2w3" width="380" height="380"></canvas></div>
+      <div class="canvas-label">$w$-plane &nbsp;·&nbsp; image $f(C)$ (real!)</div>
+    </div>
+    <div>
+      <div class="canvas-host"><canvas id="p2acc3" width="380" height="380"></canvas></div>
+      <div class="canvas-label">accumulated integral &nbsp;·&nbsp; $\int_0^\theta f\,dz$</div>
+    </div>
+  </div>
+  <div class="row" style="margin-top: 14px">
+    <button id="p2play" style="min-width: 110px">▶ play</button>
+    <button id="p2reset">reset</button>
+    <span class="badge">θ&nbsp;=&nbsp;<span id="p2th" class="num">0.000</span></span>
+    <span class="badge">z&nbsp;=&nbsp;<span id="p2zlab" class="num3">1.000 + 0.000 i</span></span>
+    <span class="badge">f(z)&nbsp;=&nbsp;<span id="p2flab" class="num2">1.000</span></span>
+    <span class="badge">∫&nbsp;≈&nbsp;<span id="p2acclab" class="num">0.000 + 0.000 i</span></span>
+  </div>
+  <input id="p2slider" type="range" min="0" max="1000" value="0" style="margin-top: 10px" />
+</section>
+
+
+<!-- ────────── E. STEP-BY-STEP ────────── -->
+<section class="card">
+  <h3>The math, step by step</h3>
+  <h2>Tap each step to reveal</h2>
+
+  <details class="reveal-step">
+    <summary>Step 1 — parameterize $C$</summary>
+    <p>$z(\theta) = e^{i\theta}$, $\theta \in [0, \pi]$. Differentiate: $dz = i\,e^{i\theta}\,d\theta$.</p>
+  </details>
+  <details class="reveal-step">
+    <summary>Step 2 — compute $\mathrm{Log}\,z$ on $C$</summary>
+    <p>$|z| = 1$ so $\ln|z| = 0$. For $\theta \in [0, \pi)$, the principal $\arg z = \theta$, well
+       inside $(-\pi, \pi)$. Hence $\mathrm{Log}\,z = i\theta$.</p>
+  </details>
+  <details class="reveal-step">
+    <summary>Step 3 — simplify $f(z(\theta))$</summary>
+    <p>$f(z) = e^{i\,\mathrm{Log}\,z} = e^{i \cdot i\theta} = e^{-\theta}$. <b>Real and decreasing.</b>
+       The boundedness $|f| \le 1$ is what saves the integral at the cut.</p>
+  </details>
+  <details class="reveal-step">
+    <summary>Step 4 — assemble the integrand</summary>
+    <p>$f(z)\,dz = e^{-\theta} \cdot i\,e^{i\theta}\,d\theta = i\,e^{(i-1)\theta}\,d\theta$.</p>
+  </details>
+  <details class="reveal-step">
+    <summary>Step 5 — integrate $\theta$ from $0$ to $\pi$</summary>
+    <p>$\displaystyle\int_0^\pi i\,e^{(i-1)\theta}\,d\theta
+      = \frac{i}{i-1}\,\bigl[e^{(i-1)\theta}\bigr]_0^\pi
+      = \frac{i}{i-1}\,\bigl(e^{(i-1)\pi} - 1\bigr).$</p>
+  </details>
+  <details class="reveal-step">
+    <summary>Step 6 — simplify</summary>
+    <p>$e^{(i-1)\pi} = e^{i\pi}\cdot e^{-\pi} = -e^{-\pi}$, &nbsp;and&nbsp;
+       $\dfrac{i}{i-1} = \dfrac{1-i}{2}$ (rationalize the denominator).</p>
+    <p>$\displaystyle = \frac{1-i}{2}\,\bigl(-e^{-\pi} - 1\bigr)
+       = \frac{(1+e^{-\pi})(i-1)}{2}.$</p>
+  </details>
+
+  <div class="ans-glow" style="margin-top: 16px">
+    $$\boxed{\;\int_C z^i\,dz = \frac{1+e^{-\pi}}{2}\,(i - 1) \approx -0.5216 + 0.5216\,i\;}$$
+  </div>
+
+  <details style="margin-top: 14px">
+    <summary>Cross-check via antiderivative</summary>
+    <p>Since $\frac{d}{dz}\!\bigl[\frac{z^{i+1}}{i+1}\bigr] = z^i$, write:</p>
+    <p>$\displaystyle\int_C z^i\,dz = \left.\frac{z^{i+1}}{i+1}\right|_{z=1}^{z=-1\,\text{(from above)}}
+      = \frac{-e^{-\pi} - 1}{i+1} = \frac{(1+e^{-\pi})(i-1)}{2}. \checkmark$</p>
+    <p>Computed at $z=-1$ as a limit along the upper semicircle, where $\mathrm{Log}\,z\to i\pi$, so
+       $z^{i+1} = e^{(i+1)\cdot i\pi} = e^{-\pi}\cdot e^{i\pi} = -e^{-\pi}$.</p>
+  </details>
+</section>
+
+
+<!-- ────────── F. QUIZ ────────── -->
+<section class="card">
+  <h3>Concept check · 5 questions</h3>
+  <h2>Test your understanding</h2>
+  <p style="color: var(--muted); margin: 4px 0 14px">Click an answer. Green = correct, red = wrong, explanation appears.</p>
+
+  <div class="quiz-q" data-correct="1">
+    <p class="q-text">1. For any $z \ne 0$, what is $|z^i|$?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt">$|z|$</button>
+      <button class="quiz-opt">$e^{-\arg z}$</button>
+      <button class="quiz-opt">$1$</button>
+      <button class="quiz-opt">$e^{i\arg z}$</button>
+    </div>
+    <p class="quiz-explain">$z^i = e^{i\,\mathrm{Log}\,z} = e^{-\arg z}\cdot e^{i\ln|z|}$, so
+      $|z^i| = e^{-\arg z}$. It depends on the <i>angle</i> of $z$, not its magnitude.</p>
+  </div>
+
+  <div class="quiz-q" data-correct="2">
+    <p class="q-text">2. On the unit circle ($|z|=1$), $z^i$ is...</p>
+    <div class="quiz-options">
+      <button class="quiz-opt">always $1$</button>
+      <button class="quiz-opt">always purely imaginary</button>
+      <button class="quiz-opt">always purely real</button>
+      <button class="quiz-opt">undefined</button>
+    </div>
+    <p class="quiz-explain">$\arg(z^i) = \ln|z| = \ln 1 = 0$, so $z^i$ has zero imaginary part. It's
+      purely real, with $z^i = e^{-\arg z}$ — the function $e^{-\theta}$ in our problem.</p>
+  </div>
+
+  <div class="quiz-q" data-correct="0">
+    <p class="q-text">3. $f$ is undefined at $z=-1$ ($\theta=\pi$). Why is $\int_C f\,dz$ still well-defined?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt">$f$ is bounded on $C$, and one point has measure zero</button>
+      <button class="quiz-opt">$f$ extends continuously across the branch cut</button>
+      <button class="quiz-opt">contour integrals automatically skip singularities</button>
+      <button class="quiz-opt">it's not — the integral diverges</button>
+    </div>
+    <p class="quiz-explain">A bounded function's integral is unaffected by behavior on a measure-zero
+      set, and a single point has measure zero. Here $|f(e^{i\theta})| = e^{-\theta} \le 1$ on all
+      of $[0,\pi]$, with finite limit $-e^{-\pi}$ at $\theta = \pi$ from above. (Note: $f$ does
+      <i>not</i> extend continuously across the cut — values from above and below differ by
+      $e^{2\pi}$.)</p>
+  </div>
+
+  <div class="quiz-q" data-correct="2">
+    <p class="q-text">4. After substitution the integrand is $i\,e^{(i-1)\theta}\,d\theta$. The antiderivative is...</p>
+    <div class="quiz-options">
+      <button class="quiz-opt">$i(i-1)\,e^{(i-1)\theta}$</button>
+      <button class="quiz-opt">$e^{(i-1)\theta}$</button>
+      <button class="quiz-opt">$\dfrac{i}{i-1}\,e^{(i-1)\theta}$</button>
+      <button class="quiz-opt">$\dfrac{1}{i-1}\,e^{(i-1)\theta}$</button>
+    </div>
+    <p class="quiz-explain">$\int e^{a\theta}\,d\theta = e^{a\theta}/a$. Here $a = i-1$ and there's
+      a leading $i$, giving $\dfrac{i}{i-1}\,e^{(i-1)\theta}$.</p>
+  </div>
+
+  <div class="quiz-q" data-correct="0">
+    <p class="q-text">5. The final value of $\int_C z^i\,dz$ is...</p>
+    <div class="quiz-options">
+      <button class="quiz-opt">$\tfrac{1+e^{-\pi}}{2}(i-1)$</button>
+      <button class="quiz-opt">$\tfrac{1+e^{-\pi}}{2}(i+1)$</button>
+      <button class="quiz-opt">$\tfrac{1-e^{-\pi}}{2}(i-1)$</button>
+      <button class="quiz-opt">$0$</button>
+    </div>
+    <p class="quiz-explain">Plugging into Step 5: $e^{(i-1)\pi} = -e^{-\pi}$, $\dfrac{i}{i-1} = \dfrac{1-i}{2}$,
+      product is $\dfrac{(1-i)}{2}(-1 - e^{-\pi}) = \dfrac{(1+e^{-\pi})(i-1)}{2}$.
+      Numerically $\approx -0.5216 + 0.5216 i$.</p>
+  </div>
+
+  <div class="quiz-score">
+    Score: <span id="qscore">0</span> / 5 &nbsp;·&nbsp; <span id="qmessage" style="color:var(--muted)">answer all five</span>
+  </div>
+</section>
+
+
+<!-- ────────── CHEAT SHEET ────────── -->
+<section class="card tight">
+  <h3>cheat sheet</h3>
+  <ul style="margin: 8px 0 4px; padding-left: 18px; line-height: 1.65">
+    <li>$z^i = e^{-\arg z}\,e^{i\ln|z|}$ &nbsp;—&nbsp; magnitude from angle, angle from magnitude.</li>
+    <li>On the unit circle, $z^i = e^{-\theta}$: <b>real and shrinking</b>.</li>
+    <li>$f(-1)$ is undefined (branch cut), but $|f|\le 1$ on $C$, so the integral is fine — one point has measure zero.</li>
+    <li>Substitute, get $i\!\int_0^\pi e^{(i-1)\theta}\,d\theta$; antiderivative is $\frac{i}{i-1}e^{(i-1)\theta}$.</li>
+    <li><b>Total: $\tfrac{1+e^{-\pi}}{2}(i-1) \approx -0.522 + 0.522\,i$.</b></li>
+  </ul>
+</section>
+
+</div><!-- /p2 -->
 
 </div>
 
@@ -1286,6 +1637,669 @@ function drawArrow(ctx, x, y, dx, dy, color, width = 1.5, headSize = 6) {
     requestAnimationFrame(animate);
   }
   animate();
+})();
+
+
+// ════════════════════════════════════════════════════════════════
+//  TAB SWITCHING
+// ════════════════════════════════════════════════════════════════
+(function () {
+  const tabs = document.querySelectorAll(".tab");
+  const contents = document.querySelectorAll(".tab-content");
+  tabs.forEach(t => {
+    t.addEventListener("click", () => {
+      tabs.forEach(x => x.classList.remove("active"));
+      contents.forEach(x => x.classList.remove("active"));
+      t.classList.add("active");
+      document.getElementById(t.dataset.tab).classList.add("active");
+      window.dispatchEvent(new CustomEvent("tabactivated", { detail: { tab: t.dataset.tab } }));
+      // re-typeset MathJax in case it skipped a hidden tab
+      if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise();
+    });
+  });
+})();
+
+
+// ════════════════════════════════════════════════════════════════
+//  P2 — z^i function helpers
+// ════════════════════════════════════════════════════════════════
+function ziOf(re, im) {
+  if (re === 0 && im === 0) return [NaN, NaN];
+  const r = Math.hypot(re, im);
+  const th = Math.atan2(im, re);          // principal arg in (-π, π]
+  const mag = Math.exp(-th);              // |z^i|
+  const arg = Math.log(r);                // arg(z^i)
+  return [mag * Math.cos(arg), mag * Math.sin(arg)];
+}
+
+
+// ════════════════════════════════════════════════════════════════
+//  P2.A — z^i PLAYGROUND
+// ════════════════════════════════════════════════════════════════
+(function () {
+  const cv = document.getElementById("zi-canvas");
+  if (!cv) return;
+  const ctx = cv.getContext("2d");
+  const W = cv.width, H = cv.height;
+  const cx = W/2, cy = H/2;
+  const half = 3;
+  const scale = (W/2) / half;
+
+  // precompute domain coloring of z^i into a buffer
+  const img = ctx.createImageData(W, H);
+  for (let py = 0; py < H; py++) {
+    for (let px = 0; px < W; px++) {
+      const re = (px - cx)/scale;
+      const im = -(py - cy)/scale;
+      const idx = (py*W + px)*4;
+      if (re*re + im*im < 1e-6) {
+        img.data[idx]=0; img.data[idx+1]=0; img.data[idx+2]=0; img.data[idx+3]=255;
+        continue;
+      }
+      const [fr, fi] = ziOf(re, im);
+      const arg = Math.atan2(fi, fr);
+      const mod = Math.hypot(fr, fi);
+      let h = (arg + Math.PI) / TAU * 360;
+      // brightness from |z^i| = e^{-arg z}, which ranges over [e^{-π}, e^{π}]
+      // map log mod into a band-y lightness
+      const logm = Math.log2(mod + 1e-12);
+      const frac = logm - Math.floor(logm);
+      let l = 0.42 + 0.20*frac;
+      if (mod > 8)   l = Math.min(0.92, l + 0.18);
+      if (mod < 0.1) l = Math.max(0.08, l - 0.18);
+      const [r,g,b] = hsl2rgb(h, 0.85, Math.max(0, Math.min(1, l)));
+      img.data[idx]=r; img.data[idx+1]=g; img.data[idx+2]=b; img.data[idx+3]=255;
+    }
+  }
+  const bg = document.createElement("canvas");
+  bg.width = W; bg.height = H;
+  bg.getContext("2d").putImageData(img, 0, 0);
+
+  let z = [1, 0]; // current z
+
+  const zLab = document.getElementById("zi-z");
+  const magLab = document.getElementById("zi-mag");
+  const argLab = document.getElementById("zi-arg");
+  const outLab = document.getElementById("zi-out");
+  const outMag = document.getElementById("zi-out-mag");
+  const outArg = document.getElementById("zi-out-arg");
+
+  function draw() {
+    ctx.drawImage(bg, 0, 0);
+    // axes
+    ctx.strokeStyle = "rgba(255,255,255,0.18)"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(W, cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, H); ctx.stroke();
+    // tick numbers
+    ctx.fillStyle = "rgba(255,255,255,0.55)"; ctx.font = "11px ui-monospace,Menlo,monospace";
+    for (let n = -2; n <= 2; n++) {
+      if (n === 0) continue;
+      ctx.fillText(String(n), cx + n*scale - 4, cy + 14);
+      ctx.fillText(String(n), cx + 6, cy - n*scale + 4);
+    }
+    // unit circle reference
+    ctx.strokeStyle = "rgba(255,255,255,0.45)"; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.arc(cx, cy, 1*scale, 0, TAU); ctx.stroke();
+    ctx.fillStyle = "rgba(255,255,255,0.7)";
+    ctx.fillText("|z|=1", cx + 1*scale + 6, cy - 4);
+    // branch cut on negative real axis
+    ctx.strokeStyle = "#ff6b6b"; ctx.lineWidth = 2; ctx.setLineDash([6, 6]);
+    ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(cx, cy); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#ff6b6b";
+    ctx.fillText("branch cut", 12, cy - 6);
+
+    // current z
+    const [px, py] = [cx + z[0]*scale, cy - z[1]*scale];
+    ctx.fillStyle = "rgba(0,0,0,0.45)";
+    ctx.beginPath(); ctx.arc(px, py, 11, 0, TAU); ctx.fill();
+    drawDot(ctx, px, py, 7, "#ffb86b", "#1a1f2b");
+
+    // line from origin to z
+    ctx.strokeStyle = "rgba(255,184,107,0.55)"; ctx.lineWidth = 1.5; ctx.setLineDash([3, 5]);
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(px, py); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // labels
+    zLab.textContent = fmtC(z[0], z[1], 3);
+    const mag = Math.hypot(z[0], z[1]);
+    magLab.textContent = fmt(mag, 3);
+    const arg = Math.atan2(z[1], z[0]);
+    argLab.textContent = fmt(arg, 3) + " rad";
+    const [fr, fi] = ziOf(z[0], z[1]);
+    if (isFinite(fr)) {
+      outLab.textContent = fmtC(fr, fi, 3);
+      outMag.innerHTML = fmt(Math.hypot(fr, fi), 3) + " = e<sup>" + fmt(-arg, 2) + "</sup>";
+      outArg.textContent = fmt(Math.log(mag), 3) + " = ln(" + fmt(mag, 2) + ")";
+    } else {
+      outLab.textContent = "—";
+      outMag.textContent = "—";
+      outArg.textContent = "—";
+    }
+  }
+
+  function setZFromEvent(ev) {
+    const rect = cv.getBoundingClientRect();
+    const xPx = (ev.clientX - rect.left) * (W / rect.width);
+    const yPx = (ev.clientY - rect.top) * (H / rect.height);
+    z = [(xPx - cx)/scale, -(yPx - cy)/scale];
+    draw();
+  }
+
+  let dragging = false;
+  cv.addEventListener("mousedown", (e) => { dragging = true; setZFromEvent(e); });
+  window.addEventListener("mousemove", (e) => { if (dragging) setZFromEvent(e); });
+  window.addEventListener("mouseup", () => { dragging = false; });
+  cv.addEventListener("mousemove", (e) => { if (!dragging) setZFromEvent(e); });
+
+  draw();
+})();
+
+
+// ════════════════════════════════════════════════════════════════
+//  P2.B — BOUNDEDNESS PLOT (|f(e^iθ)| vs θ)
+// ════════════════════════════════════════════════════════════════
+(function () {
+  const cv = document.getElementById("bound-plot");
+  if (!cv) return;
+  const ctx = cv.getContext("2d");
+  const W = cv.width, H = cv.height;
+
+  const padL = 70, padR = 40, padT = 30, padB = 50;
+  const x0 = padL, x1 = W - padR;
+  const y0 = padT, y1 = H - padB;
+  const yMax = 1.1, yMin = 0;
+
+  function xOf(theta) { return x0 + (theta / Math.PI) * (x1 - x0); }
+  function yOf(v) { return y1 - (v - yMin) / (yMax - yMin) * (y1 - y0); }
+
+  ctx.fillStyle = "#11151d"; ctx.fillRect(0, 0, W, H);
+  // axes
+  ctx.strokeStyle = "#3a4256"; ctx.lineWidth = 1.4;
+  ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x0, y1); ctx.lineTo(x1, y1); ctx.stroke();
+  // grid + labels
+  ctx.fillStyle = "#8a93a6"; ctx.font = "12px ui-monospace, Menlo, monospace";
+  ctx.strokeStyle = "#1f2533";
+  for (let v = 0; v <= 1; v += 0.2) {
+    const y = yOf(v);
+    ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke();
+    ctx.fillText(v.toFixed(1), x0 - 30, y + 4);
+  }
+  for (let i = 0; i <= 4; i++) {
+    const t = i * Math.PI / 4;
+    const x = xOf(t);
+    ctx.beginPath(); ctx.moveTo(x, y0); ctx.lineTo(x, y1); ctx.stroke();
+    let label = ["0", "π/4", "π/2", "3π/4", "π"][i];
+    ctx.fillText(label, x - 12, y1 + 18);
+  }
+  ctx.fillText("θ", (x0+x1)/2, y1 + 36);
+  ctx.save();
+  ctx.translate(20, (y0+y1)/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.fillText("|f(e^{iθ})|", -30, 0);
+  ctx.restore();
+
+  // bound at e^{-π}
+  const ePi = Math.exp(-Math.PI);
+  ctx.strokeStyle = "#7ee787"; ctx.lineWidth = 1.2; ctx.setLineDash([4, 5]);
+  ctx.beginPath(); ctx.moveTo(x0, yOf(ePi)); ctx.lineTo(x1, yOf(ePi)); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = "#7ee787"; ctx.fillText("e^{-π} ≈ " + ePi.toFixed(3), x1 - 130, yOf(ePi) - 6);
+  // bound at 1
+  ctx.strokeStyle = "#7ee787"; ctx.setLineDash([4, 5]);
+  ctx.beginPath(); ctx.moveTo(x0, yOf(1)); ctx.lineTo(x1, yOf(1)); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillText("upper bound = 1", x1 - 130, yOf(1) - 6);
+
+  // the curve
+  ctx.strokeStyle = "#ffb86b"; ctx.lineWidth = 3;
+  ctx.beginPath();
+  for (let i = 0; i <= 400; i++) {
+    const th = Math.PI * i / 400;
+    const v = Math.exp(-th);
+    const x = xOf(th), y = yOf(v);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // missing-value marker at θ=π
+  {
+    const x = xOf(Math.PI);
+    ctx.strokeStyle = "#ff6b6b"; ctx.setLineDash([4, 5]); ctx.lineWidth = 1.3;
+    ctx.beginPath(); ctx.moveTo(x, y0); ctx.lineTo(x, y1); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#ff6b6b";
+    ctx.fillText("θ = π : f undefined here (one point)", x - 200, y0 + 12);
+    // open circle at limit point
+    ctx.beginPath();
+    ctx.arc(x, yOf(ePi), 6, 0, TAU);
+    ctx.fillStyle = "#11151d"; ctx.fill();
+    ctx.strokeStyle = "#ffb86b"; ctx.lineWidth = 2; ctx.stroke();
+  }
+})();
+
+
+// ════════════════════════════════════════════════════════════════
+//  P2.C — UNIT CIRCLE SLIDER (z(θ) and f(z) = e^{-θ})
+// ════════════════════════════════════════════════════════════════
+(function () {
+  const ucZ = document.getElementById("uc-z");
+  const ucF = document.getElementById("uc-f");
+  if (!ucZ || !ucF) return;
+  const cZ = ucZ.getContext("2d");
+  const cF = ucF.getContext("2d");
+  const slider = document.getElementById("uc-slider");
+  const thLab = document.getElementById("uc-th");
+  const zLab = document.getElementById("uc-zlab");
+  const fLab = document.getElementById("uc-flab");
+  const W = 380, H = 380;
+
+  function drawZ(theta) {
+    const ax = setupPlane(cZ, W, H, { scale: 110, reLabel: "Re z", imLabel: "Im z" });
+    // unit circle ref (full)
+    cZ.strokeStyle = "#34466a"; cZ.setLineDash([3, 5]); cZ.lineWidth = 1;
+    cZ.beginPath(); cZ.arc(ax.cx, ax.cy, 1*ax.scale, 0, TAU); cZ.stroke();
+    cZ.setLineDash([]);
+    // upper semicircle (the contour)
+    cZ.strokeStyle = "#6ea8ff"; cZ.lineWidth = 2.5;
+    cZ.beginPath();
+    for (let i = 0; i <= 200; i++) {
+      const th = Math.PI*i/200;
+      const [px, py] = ax.toPx(Math.cos(th), Math.sin(th));
+      if (i===0) cZ.moveTo(px, py); else cZ.lineTo(px, py);
+    }
+    cZ.stroke();
+    // direction arrows
+    cZ.fillStyle = "#6ea8ff";
+    for (let k = 1; k <= 4; k++) {
+      const th = Math.PI*k/5;
+      const [px, py] = ax.toPx(Math.cos(th), Math.sin(th));
+      const ang = Math.atan2(Math.cos(th), Math.sin(th));
+      cZ.save(); cZ.translate(px, py); cZ.rotate(ang);
+      cZ.beginPath(); cZ.moveTo(0,0); cZ.lineTo(-7, 4); cZ.lineTo(-7, -4); cZ.closePath(); cZ.fill();
+      cZ.restore();
+    }
+    // endpoints
+    {
+      const [px, py] = ax.toPx(1, 0);
+      drawDot(cZ, px, py, 5, "#7ee787");
+      cZ.fillStyle = "#cfd4df"; cZ.font = "11px ui-monospace,Menlo,monospace";
+      cZ.fillText("z(0)=1", px + 6, py + 16);
+    }
+    {
+      const [px, py] = ax.toPx(-1, 0);
+      drawDot(cZ, px, py, 5, "#ff6b6b");
+      cZ.fillStyle = "#ff6b6b";
+      cZ.fillText("z(π)=-1 (cut)", px - 100, py + 16);
+    }
+    // moving point
+    const [px, py] = ax.toPx(Math.cos(theta), Math.sin(theta));
+    drawDot(cZ, px, py, 7, "#ffb86b", "#1a1f2b");
+  }
+
+  function drawF(theta) {
+    // place real-axis with origin at center, cover [-0.1, 1.1]
+    const padL = 50, padR = 30;
+    cF.fillStyle = "#11151d"; cF.fillRect(0, 0, W, H);
+    // grid
+    const xMin = -0.1, xMax = 1.1;
+    const yMid = H/2;
+    function xOf(v) { return padL + (v - xMin)/(xMax - xMin) * (W - padL - padR); }
+    cF.strokeStyle = "#1f2533"; cF.lineWidth = 1;
+    for (let v = 0; v <= 1; v += 0.2) {
+      const x = xOf(v);
+      cF.beginPath(); cF.moveTo(x, 30); cF.lineTo(x, H - 30); cF.stroke();
+    }
+    // axis line
+    cF.strokeStyle = "#3a4256"; cF.lineWidth = 1.4;
+    cF.beginPath(); cF.moveTo(padL, yMid); cF.lineTo(W - padR, yMid); cF.stroke();
+    // axis ticks
+    cF.fillStyle = "#8a93a6"; cF.font = "11px ui-monospace,Menlo,monospace";
+    for (let v = 0; v <= 1; v += 0.2) {
+      const x = xOf(v);
+      cF.beginPath(); cF.moveTo(x, yMid - 4); cF.lineTo(x, yMid + 4); cF.stroke();
+      cF.fillText(v.toFixed(1), x - 8, yMid + 18);
+    }
+    cF.fillText("0", xOf(0) - 4, yMid + 18);
+    cF.fillStyle = "#8a93a6"; cF.fillText("Re f(z)", W - 70, yMid - 12);
+
+    // segment: f traces from 1 down to e^{-π}
+    const yTrace = yMid;
+    cF.strokeStyle = "#34466a"; cF.lineWidth = 2;
+    cF.beginPath();
+    cF.moveTo(xOf(Math.exp(-Math.PI)), yTrace);
+    cF.lineTo(xOf(1), yTrace);
+    cF.stroke();
+    // endpoints
+    {
+      const x = xOf(1);
+      drawDot(cF, x, yTrace, 5, "#7ee787");
+      cF.fillStyle = "#cfd4df"; cF.font = "11px ui-monospace,Menlo,monospace";
+      cF.fillText("f(z(0)) = 1", x - 18, yTrace - 14);
+    }
+    {
+      const x = xOf(Math.exp(-Math.PI));
+      drawDot(cF, x, yTrace, 5, "#ff6b6b");
+      cF.fillStyle = "#ff6b6b";
+      cF.fillText("limit at π = -e^{-π}", x - 14, yTrace + 36);
+    }
+    // current point
+    const v = Math.exp(-theta);
+    const x = xOf(v);
+    drawDot(cF, x, yTrace, 8, "#ffb86b", "#1a1f2b");
+    // value annotation
+    cF.fillStyle = "#ffb86b"; cF.font = "13px ui-monospace,Menlo,monospace";
+    cF.fillText("e^{-θ} = " + v.toFixed(4), x - 30, yTrace - 30);
+
+    // big "real!" annotation
+    cF.fillStyle = "#7ee787"; cF.font = "13px -apple-system, Inter";
+    cF.fillText("• always real (zero imaginary part) •", padL + 30, 40);
+  }
+
+  function update(t) {
+    const theta = Math.PI * t;
+    drawZ(theta);
+    drawF(theta);
+    thLab.textContent = (theta).toFixed(3);
+    const zr = Math.cos(theta), zi = Math.sin(theta);
+    zLab.textContent = fmtC(zr, zi, 3);
+    fLab.textContent = Math.exp(-theta).toFixed(4) + " + 0.000 i";
+  }
+
+  slider.addEventListener("input", () => update(+slider.value / 1000));
+  update(0);
+})();
+
+
+// ════════════════════════════════════════════════════════════════
+//  P2.D — SYNCED TRIPLE PANEL (z, f(z), accumulator) for ∫ z^i dz
+// ════════════════════════════════════════════════════════════════
+(function () {
+  const cZ = document.getElementById("p2z3");
+  const cW = document.getElementById("p2w3");
+  const cA = document.getElementById("p2acc3");
+  if (!cZ || !cW || !cA) return;
+  const ctxZ = cZ.getContext("2d");
+  const ctxW = cW.getContext("2d");
+  const ctxA = cA.getContext("2d");
+  const slider = document.getElementById("p2slider");
+  const playBtn = document.getElementById("p2play");
+  const resetBtn = document.getElementById("p2reset");
+  const thLab = document.getElementById("p2th");
+  const zLab = document.getElementById("p2zlab");
+  const fLab = document.getElementById("p2flab");
+  const accLab = document.getElementById("p2acclab");
+
+  let t = 0;
+  let playing = false;
+
+  // precompute accumulated integral via midpoint rule
+  const NG = 1000;
+  const accR = new Float64Array(NG + 1);
+  const accI = new Float64Array(NG + 1);
+  for (let i = 1; i <= NG; i++) {
+    const th0 = Math.PI*(i-1)/NG;
+    const th1 = Math.PI*i/NG;
+    const thm = (th0+th1)/2;
+    const z0r = Math.cos(th0), z0i = Math.sin(th0);
+    const z1r = Math.cos(th1), z1i = Math.sin(th1);
+    const dzr = z1r - z0r, dzi = z1i - z0i;
+    // f(z(thm)) = e^{-thm} (real)
+    const fr = Math.exp(-thm), fi = 0;
+    const tr = fr*dzr - fi*dzi;
+    const ti = fr*dzi + fi*dzr;
+    accR[i] = accR[i-1] + tr;
+    accI[i] = accI[i-1] + ti;
+  }
+
+  function drawZpanel(t) {
+    const W = 380, H = 380;
+    const ax = setupPlane(ctxZ, W, H, { scale: 110, reLabel: "Re z", imLabel: "Im z" });
+    // unit circle ref
+    ctxZ.strokeStyle = "#34466a"; ctxZ.setLineDash([3, 5]); ctxZ.lineWidth = 1;
+    ctxZ.beginPath(); ctxZ.arc(ax.cx, ax.cy, 1*ax.scale, 0, TAU); ctxZ.stroke();
+    ctxZ.setLineDash([]);
+    // upper semicircle (contour)
+    ctxZ.strokeStyle = "#6ea8ff"; ctxZ.lineWidth = 2.5;
+    ctxZ.beginPath();
+    for (let i = 0; i <= 200; i++) {
+      const th = Math.PI*i/200;
+      const [px, py] = ax.toPx(Math.cos(th), Math.sin(th));
+      if (i===0) ctxZ.moveTo(px, py); else ctxZ.lineTo(px, py);
+    }
+    ctxZ.stroke();
+    // arrow ticks
+    ctxZ.fillStyle = "#6ea8ff";
+    for (let k = 1; k <= 4; k++) {
+      const th = Math.PI*k/5;
+      const [px, py] = ax.toPx(Math.cos(th), Math.sin(th));
+      const ang = Math.atan2(Math.cos(th), Math.sin(th));
+      ctxZ.save(); ctxZ.translate(px, py); ctxZ.rotate(ang);
+      ctxZ.beginPath(); ctxZ.moveTo(0,0); ctxZ.lineTo(-7, 4); ctxZ.lineTo(-7, -4); ctxZ.closePath(); ctxZ.fill();
+      ctxZ.restore();
+    }
+    // endpoints
+    {
+      const [px, py] = ax.toPx(1, 0);
+      drawDot(ctxZ, px, py, 5, "#6ea8ff");
+      ctxZ.fillStyle = "#cfd4df"; ctxZ.font = "11px ui-monospace,Menlo,monospace";
+      ctxZ.fillText("z(0)=1", px + 6, py + 16);
+    }
+    {
+      const [px, py] = ax.toPx(-1, 0);
+      drawDot(ctxZ, px, py, 5, "#ff6b6b");
+      ctxZ.fillStyle = "#ff6b6b";
+      ctxZ.fillText("z(π)=-1 (cut)", px - 100, py + 16);
+    }
+    // moving point + tangent
+    const theta = Math.PI*t;
+    const zr = Math.cos(theta), zi = Math.sin(theta);
+    const [px, py] = ax.toPx(zr, zi);
+    const tr = -Math.sin(theta), ti = Math.cos(theta);
+    const tipx = px + tr*ax.scale*0.25;
+    const tipy = py - ti*ax.scale*0.25;
+    drawArrow(ctxZ, px, py, tipx-px, tipy-py, "#7ee787", 2.5, 7);
+    drawDot(ctxZ, px, py, 7, "#ffb86b", "#1a1f2b");
+  }
+
+  function drawWpanel(t) {
+    const W = 380, H = 380;
+    ctxW.fillStyle = "#11151d"; ctxW.fillRect(0, 0, W, H);
+    // setup plane with origin centered, scale chosen to show [-0.2, 1.2] x small imag range
+    const padL = 50, padR = 30;
+    const xMin = -0.2, xMax = 1.2;
+    const yMid = H/2;
+    function xOf(v) { return padL + (v - xMin)/(xMax - xMin) * (W - padL - padR); }
+    // grid & axis
+    ctxW.strokeStyle = "#1f2533"; ctxW.lineWidth = 1;
+    for (let v = 0; v <= 1; v += 0.25) {
+      const x = xOf(v);
+      ctxW.beginPath(); ctxW.moveTo(x, 30); ctxW.lineTo(x, H-30); ctxW.stroke();
+    }
+    ctxW.strokeStyle = "#3a4256"; ctxW.lineWidth = 1.4;
+    ctxW.beginPath(); ctxW.moveTo(padL, yMid); ctxW.lineTo(W-padR, yMid); ctxW.stroke();
+    // ticks
+    ctxW.fillStyle = "#8a93a6"; ctxW.font = "11px ui-monospace,Menlo,monospace";
+    for (let v of [0, 0.25, 0.5, 0.75, 1]) {
+      const x = xOf(v);
+      ctxW.beginPath(); ctxW.moveTo(x, yMid-4); ctxW.lineTo(x, yMid+4); ctxW.stroke();
+      ctxW.fillText(v.toFixed(2), x - 12, yMid + 18);
+    }
+    ctxW.fillText("Re w", W - 50, yMid - 8);
+    ctxW.fillText("Im w = 0", padL + 6, 24);
+
+    // image curve (just a real-axis segment, drawn full)
+    ctxW.strokeStyle = "#6ea8ff"; ctxW.lineWidth = 3;
+    ctxW.beginPath();
+    ctxW.moveTo(xOf(Math.exp(-Math.PI)), yMid);
+    ctxW.lineTo(xOf(1), yMid);
+    ctxW.stroke();
+    // direction
+    {
+      const x = xOf(0.5);
+      ctxW.fillStyle = "#6ea8ff";
+      ctxW.beginPath();
+      ctxW.moveTo(x, yMid); ctxW.lineTo(x + 8, yMid - 5); ctxW.lineTo(x + 8, yMid + 5);
+      ctxW.closePath(); ctxW.fill();
+    }
+    // endpoints
+    drawDot(ctxW, xOf(1), yMid, 5, "#6ea8ff");
+    ctxW.fillStyle = "#cfd4df";
+    ctxW.fillText("f(z(0)) = 1", xOf(1) - 22, yMid - 12);
+    drawDot(ctxW, xOf(Math.exp(-Math.PI)), yMid, 5, "#ff6b6b");
+    ctxW.fillStyle = "#ff6b6b";
+    ctxW.fillText("limit -e^{-π}", xOf(Math.exp(-Math.PI)) - 12, yMid + 36);
+
+    // moving point
+    const theta = Math.PI*t;
+    const v = Math.exp(-theta);
+    const x = xOf(v);
+    drawDot(ctxW, x, yMid, 8, "#ffb86b", "#1a1f2b");
+    // annotation
+    ctxW.fillStyle = "#ffb86b"; ctxW.font = "12px ui-monospace,Menlo,monospace";
+    ctxW.fillText("e^{-θ} = " + v.toFixed(3), x - 30, yMid - 30);
+  }
+
+  function drawAccPanel(t) {
+    const W = 380, H = 380;
+    // place origin around upper-right, target is in upper-left (negative real, positive imag)
+    // target ≈ (-0.522, 0.522), so we need x range about [-0.7, 0.1], y range about [0, 0.7]
+    const ax = setupPlane(ctxA, W, H, { cx: 280, cy: 290, scale: 320, reLabel: "Re", imLabel: "Im" });
+    // target marker
+    const tr = (1 + Math.exp(-Math.PI))/2 * (-1);
+    const ti = (1 + Math.exp(-Math.PI))/2 * 1;
+    {
+      const [px, py] = ax.toPx(tr, ti);
+      ctxA.strokeStyle = "#7ee787"; ctxA.lineWidth = 1.5;
+      ctxA.beginPath(); ctxA.arc(px, py, 10, 0, TAU); ctxA.stroke();
+      ctxA.fillStyle = "#7ee787"; ctxA.font = "11px ui-monospace,Menlo,monospace";
+      ctxA.fillText("(1+e^{-π})(i-1)/2", px + 14, py + 4);
+    }
+    // path so far
+    const N = Math.max(1, Math.floor(t * NG));
+    ctxA.strokeStyle = "#ffb86b"; ctxA.lineWidth = 2.5;
+    ctxA.beginPath();
+    for (let i = 0; i <= N; i++) {
+      const [px, py] = ax.toPx(accR[i], accI[i]);
+      if (i===0) ctxA.moveTo(px, py); else ctxA.lineTo(px, py);
+    }
+    ctxA.stroke();
+    // ghost rest
+    ctxA.strokeStyle = "rgba(255,184,107,0.18)"; ctxA.lineWidth = 1.5;
+    ctxA.beginPath();
+    for (let i = N; i <= NG; i++) {
+      const [px, py] = ax.toPx(accR[i], accI[i]);
+      if (i===N) ctxA.moveTo(px, py); else ctxA.lineTo(px, py);
+    }
+    ctxA.stroke();
+    // current head
+    const [hpx, hpy] = ax.toPx(accR[N], accI[N]);
+    drawDot(ctxA, hpx, hpy, 6, "#ffb86b", "#1a1f2b");
+    // dashed line origin → head
+    ctxA.strokeStyle = "rgba(255,184,107,0.35)"; ctxA.setLineDash([3,4]); ctxA.lineWidth = 1.2;
+    const [opx, opy] = ax.toPx(0, 0);
+    ctxA.beginPath(); ctxA.moveTo(opx, opy); ctxA.lineTo(hpx, hpy); ctxA.stroke();
+    ctxA.setLineDash([]);
+  }
+
+  function update() {
+    drawZpanel(t);
+    drawWpanel(t);
+    drawAccPanel(t);
+    const theta = Math.PI*t;
+    thLab.textContent = theta.toFixed(3);
+    zLab.textContent = fmtC(Math.cos(theta), Math.sin(theta), 3);
+    fLab.textContent = Math.exp(-theta).toFixed(4);
+    const N = Math.max(0, Math.floor(t * NG));
+    accLab.textContent = fmtC(accR[N], accI[N], 4);
+  }
+
+  slider.addEventListener("input", () => { t = +slider.value / 1000; update(); });
+  resetBtn.addEventListener("click", () => { t = 0; slider.value = 0; update(); });
+
+  let lastTime = 0;
+  function animate(now) {
+    if (!playing) return;
+    const dt = lastTime ? (now - lastTime)/1000 : 0;
+    lastTime = now;
+    t += dt * 0.25;
+    if (t >= 1) { t = 1; playing = false; playBtn.textContent = "▶ play"; }
+    slider.value = t * 1000;
+    update();
+    if (playing) requestAnimationFrame(animate);
+  }
+  playBtn.addEventListener("click", () => {
+    playing = !playing;
+    playBtn.textContent = playing ? "⏸ pause" : "▶ play";
+    if (playing) {
+      if (t >= 1) t = 0;
+      lastTime = 0;
+      requestAnimationFrame(animate);
+    }
+  });
+
+  // when user switches to p2 tab, auto-play once
+  let hasAutoPlayed = false;
+  window.addEventListener("tabactivated", (e) => {
+    if (e.detail.tab === "p2" && !hasAutoPlayed) {
+      hasAutoPlayed = true;
+      setTimeout(() => {
+        if (!playing) {
+          playing = true; playBtn.textContent = "⏸ pause";
+          lastTime = 0;
+          t = 0; slider.value = 0;
+          requestAnimationFrame(animate);
+        }
+      }, 400);
+    }
+  });
+
+  update();
+})();
+
+
+// ════════════════════════════════════════════════════════════════
+//  P2.E — QUIZ
+// ════════════════════════════════════════════════════════════════
+(function () {
+  const questions = document.querySelectorAll(".quiz-q");
+  if (!questions.length) return;
+  const scoreEl = document.getElementById("qscore");
+  const messageEl = document.getElementById("qmessage");
+  const answered = new Set();
+  let correct = 0;
+
+  questions.forEach((q, qi) => {
+    const correctIdx = +q.dataset.correct;
+    const opts = q.querySelectorAll(".quiz-opt");
+    const explain = q.querySelector(".quiz-explain");
+    opts.forEach((opt, oi) => {
+      opt.addEventListener("click", () => {
+        if (answered.has(qi)) return;
+        answered.add(qi);
+        if (oi === correctIdx) {
+          opt.classList.add("correct");
+          correct++;
+        } else {
+          opt.classList.add("wrong");
+          opts[correctIdx].classList.add("correct");
+        }
+        opts.forEach(o => { if (!o.classList.contains("correct") && !o.classList.contains("wrong"))
+          o.style.opacity = 0.5; });
+        explain.classList.add("show");
+        scoreEl.textContent = correct;
+        if (answered.size === questions.length) {
+          if (correct === questions.length) messageEl.textContent = "perfect score 🎉";
+          else if (correct >= 4) messageEl.textContent = "nicely done";
+          else if (correct >= 2) messageEl.textContent = "review the concepts above and try again";
+          else messageEl.textContent = "scroll up — the playground & step-by-step will help";
+          messageEl.style.color = correct >= 4 ? "var(--good)" : "var(--accent2)";
+        } else {
+          messageEl.textContent = `${questions.length - answered.size} to go`;
+        }
+      });
+    });
+  });
 })();
 </script>
 </body>
