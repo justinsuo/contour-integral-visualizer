@@ -1,0 +1,1292 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Contour integral — interactive guide</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$','$'], ['\\(','\\)']], displayMath: [['$$','$$'], ['\\[','\\]']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+<style>
+  :root {
+    --bg: #0b0e14;
+    --bg2: #11151d;
+    --panel: #161a22;
+    --panel2: #1b2230;
+    --line: #232a37;
+    --line2: #2a3140;
+    --ink: #e6e8ee;
+    --muted: #8a93a6;
+    --accent: #6ea8ff;
+    --accent2: #ffb86b;
+    --accent3: #b48cff;
+    --good: #7ee787;
+    --bad: #ff6b6b;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: radial-gradient(ellipse at top, #11151d 0%, #0b0e14 60%);
+    color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+    -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 32px 22px 80px; }
+  h1 { font-size: 30px; margin: 0 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 19px; margin: 0 0 10px; color: var(--accent); letter-spacing: .01em; }
+  h3 { font-size: 12px; margin: 0 0 10px; color: var(--accent2);
+       text-transform: uppercase; letter-spacing: .15em; }
+  .lede { color: var(--muted); margin: 0 0 22px; font-size: 15px; }
+  .answer-banner { display: inline-block; background: linear-gradient(135deg, #1a3060, #0e2547);
+    border: 1px solid #2a4a85; border-radius: 10px; padding: 8px 16px; margin: 6px 0 20px;
+    font-size: 16px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+    padding: 20px 22px 22px; margin: 18px 0; }
+  .card.tight { padding: 14px 16px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  @media (max-width: 980px) { .grid3 { grid-template-columns: 1fr; } .grid2 { grid-template-columns: 1fr; } }
+  .row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .canvas-host { background: var(--bg2); border: 1px solid var(--line); border-radius: 12px; padding: 8px;
+    position: relative; }
+  .canvas-host canvas { display: block; width: 100%; height: auto; border-radius: 8px; }
+  .canvas-label { color: var(--muted); font-size: 12px; text-align: center; margin-top: 6px;
+    font-family: ui-monospace, Menlo, monospace; }
+  .stat { font-family: ui-monospace, Menlo, monospace; font-size: 13px; color: #d0d4de; line-height: 1.7; }
+  .num { color: var(--good); }
+  .num2 { color: var(--accent2); }
+  .num3 { color: var(--accent); }
+  .badge { background: var(--panel2); border: 1px solid var(--line2); color: var(--muted);
+    padding: 3px 10px; border-radius: 999px; font-size: 12px; font-family: ui-monospace, Menlo, monospace; }
+  .pill { background: #20355c; color: #c1d6ff; padding: 2px 8px; border-radius: 6px; font-size: 12.5px; }
+  button { background: var(--panel2); color: var(--ink); border: 1px solid var(--line2);
+    border-radius: 8px; padding: 8px 14px; font-size: 13px; cursor: pointer; transition: all .15s; }
+  button:hover { border-color: var(--accent); color: var(--accent); }
+  button.active { border-color: var(--accent); color: var(--accent); background: #1a2540; }
+  input[type="range"] { width: 100%; accent-color: var(--accent); height: 6px; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; color: var(--muted); font-size: 12px; }
+  .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px;
+    vertical-align: middle; }
+  details > summary { cursor: pointer; color: var(--accent); margin: 4px 0; list-style: none; user-select: none; }
+  details > summary::before { content: "▸  "; }
+  details[open] > summary::before { content: "▾  "; }
+  .toggles { display: flex; gap: 8px; flex-wrap: wrap; }
+  .step { padding: 12px 0; border-top: 1px dashed var(--line); }
+  .step:first-of-type { border-top: 0; padding-top: 4px; }
+  .live-eq { font-family: ui-monospace, Menlo, monospace; font-size: 13px; color: #cfd4df;
+    background: var(--bg2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 10px 12px; line-height: 1.7; }
+  .live-eq .lhs { color: var(--muted); }
+  .ans-glow { background: linear-gradient(135deg, #1a2440, #14305e); border: 1px solid #2c4d8e;
+    border-radius: 12px; padding: 16px 18px; box-shadow: 0 0 30px rgba(110, 168, 255, .15); }
+  .head-row { display: flex; align-items: baseline; gap: 14px; margin-bottom: 6px; }
+  .nums { font-family: ui-monospace, Menlo, monospace; }
+  .footer-note { color: var(--muted); font-size: 12px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ─── HERO ─── -->
+<h1>Contour integral on the lower semicircle of radius 2</h1>
+<p class="lede">
+  Problem 1. Let $C$ be $z(\theta) = 2e^{i\theta}$ for $\theta \in [\pi, 2\pi]$. Evaluate
+  $\displaystyle \int_C \frac{z+2}{z}\,dz$.
+</p>
+<div class="answer-banner">
+  Answer: $\displaystyle \int_C \frac{z+2}{z}\,dz \;=\; 4 + 2\pi i \;\approx\; 4 + 6.2832\,i$
+</div>
+
+
+<!-- ────────── 1. SYNCHRONIZED TRIPLE PANEL ────────── -->
+<section class="card">
+  <h3>The three views, synchronized</h3>
+  <h2>Watch the integral accumulate as $\theta$ sweeps from $\pi$ to $2\pi$</h2>
+  <p style="color:var(--muted); margin: 4px 0 14px">
+    Three pictures, one playhead. Left: the point $z(\theta)$ on the contour $C$.
+    Middle: its image $w = f(z)$ tracing $f(C)$ in the $w$-plane.
+    Right: the running integral $\int_\pi^\theta f\,dz$ — drawn as a path that builds head-to-tail
+    and lands at exactly $4+2\pi i$.
+  </p>
+
+  <div class="grid3">
+    <div>
+      <div class="canvas-host"><canvas id="z3" width="380" height="380"></canvas></div>
+      <div class="canvas-label">$z$-plane &nbsp;·&nbsp; contour $C$</div>
+    </div>
+    <div>
+      <div class="canvas-host"><canvas id="w3" width="380" height="380"></canvas></div>
+      <div class="canvas-label">$w$-plane &nbsp;·&nbsp; image $f(C)$</div>
+    </div>
+    <div>
+      <div class="canvas-host"><canvas id="acc3" width="380" height="380"></canvas></div>
+      <div class="canvas-label">accumulated integral &nbsp;·&nbsp; $\int_\pi^\theta f\,dz$</div>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top: 16px">
+    <button id="play3" style="min-width: 110px">▶ play</button>
+    <button id="reset3">reset</button>
+    <span class="badge">θ&nbsp;=&nbsp;<span id="thLab" class="num">π</span></span>
+    <span class="badge">z&nbsp;=&nbsp;<span id="zLab" class="num3">−2.000 + 0.000 i</span></span>
+    <span class="badge">f(z)&nbsp;=&nbsp;<span id="fLab" class="num2">0.000 + 0.000 i</span></span>
+    <span class="badge">∫&nbsp;≈&nbsp;<span id="accLab" class="num">0.000 + 0.000 i</span></span>
+  </div>
+  <input id="th3" type="range" min="0" max="1000" value="0" style="margin-top: 10px" />
+
+  <div class="footer-note">
+    The integral is a complex line integral, so the running sum is a <i>path</i> in the complex
+    plane, not a number on a real axis. The way the green tail curls upward is exactly the
+    $2\pi i$ contribution.
+  </div>
+</section>
+
+
+<!-- ────────── 2. DOMAIN COLORING + VECTOR FIELD ────────── -->
+<section class="card">
+  <h3>The integrand, painted</h3>
+  <h2>Phase portrait of $f(z) = \dfrac{z+2}{z}$ with the contour overlaid</h2>
+  <p style="color:var(--muted); margin: 4px 0 14px">
+    Hue = $\arg f(z)$ (color wheel), brightness rings = $|f(z)|$ doubling. The white dot at $z=0$ is
+    the pole; the dark spot at $z=-2$ is the zero. Toggle the overlays to see how $f$ flows along $C$.
+  </p>
+
+  <div class="grid2">
+    <div>
+      <div class="canvas-host"><canvas id="dom" width="500" height="500"></canvas></div>
+      <div class="canvas-label">$z$-plane, colored by $f(z)$</div>
+    </div>
+    <div>
+      <div class="toggles" style="margin-bottom: 10px">
+        <button id="t-contour" class="active">show contour C</button>
+        <button id="t-grid" class="active">f-vector field</button>
+        <button id="t-dz">dz arrows</button>
+        <button id="t-prod">f·dz arrows</button>
+      </div>
+      <p style="color:#cfd4df; line-height: 1.6; margin: 6px 0">
+        <b>How to read it.</b> Pick any point on the orange contour. The
+        <span style="color:#cfd4df">color underneath</span> is $\arg f$, and the
+        <span style="color:#cfd4df">brightness</span> tells you $|f|$. Walk along the contour and
+        watch the color cycle — that cycling is what the integral counts.
+      </p>
+      <p style="color:#cfd4df; line-height: 1.6; margin: 6px 0">
+        Turn on <span class="pill">f-vector field</span> to see $f(z)$ as little arrows. They almost
+        all point right (because near $z=2$, $f$ is close to $2$, and far from the pole, $f \to 1$).
+        The arrows only swirl wildly near $z=0$.
+      </p>
+      <p style="color:#cfd4df; line-height: 1.6; margin: 6px 0">
+        Turn on <span class="pill">dz arrows</span> to see the tangent direction along $C$, and
+        <span class="pill">f·dz arrows</span> to see the actual integrand vectors that get summed.
+        The integral $4+2\pi i$ is the head-to-tail sum of those green arrows.
+      </p>
+      <div class="legend" style="margin-top: 14px">
+        <span><span class="swatch" style="background: #ffb86b"></span>contour C</span>
+        <span><span class="swatch" style="background: #cfd4df"></span>f(z) vectors</span>
+        <span><span class="swatch" style="background: #6ea8ff"></span>dz tangent</span>
+        <span><span class="swatch" style="background: #7ee787"></span>f·dz</span>
+        <span><span class="swatch" style="background: #fff"></span>pole z=0</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ────────── 3. PATH COMPARISON ────────── -->
+<section class="card">
+  <h3>Why the answer is what it is</h3>
+  <h2>Different paths from $-2$ to $+2$ — the imaginary part depends on which side of the pole you go</h2>
+  <p style="color:var(--muted); margin: 4px 0 14px">
+    Pick a path. The real part of the answer is always 4 (because $\int 1\,dz$ only depends on
+    endpoints). But the imaginary part changes — it's $\pm \pi$ times 2 depending on whether the
+    path winds <i>under</i> the pole, <i>over</i> it, or all the way around.
+  </p>
+  <div class="toggles" style="margin-bottom: 14px">
+    <button class="path-btn active" data-path="lower">↘ lower semicircle (our problem)</button>
+    <button class="path-btn" data-path="upper">↗ upper semicircle</button>
+    <button class="path-btn" data-path="closed">⟲ full circle (closed loop)</button>
+    <button class="path-btn" data-path="zigzag">↑→↓ zig-zag over the pole</button>
+  </div>
+
+  <div class="grid3">
+    <div>
+      <div class="canvas-host"><canvas id="pthZ" width="380" height="380"></canvas></div>
+      <div class="canvas-label">path in $z$-plane</div>
+    </div>
+    <div>
+      <div class="canvas-host"><canvas id="pthW" width="380" height="380"></canvas></div>
+      <div class="canvas-label">image $f(\text{path})$ in $w$-plane</div>
+    </div>
+    <div>
+      <div class="canvas-host"><canvas id="pthAcc" width="380" height="380"></canvas></div>
+      <div class="canvas-label">accumulated integral</div>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top: 14px">
+    <span class="badge">∫ along selected path&nbsp;=&nbsp;<span id="pthAns" class="num">4 + 2π i</span></span>
+    <span class="badge">numeric ≈&nbsp;<span id="pthAnsN" class="num">4.0000 + 6.2832 i</span></span>
+    <span class="badge">winding around z=0&nbsp;=&nbsp;<span id="windLab" class="num2">−1/2</span> turn(s)</span>
+  </div>
+
+  <details style="margin-top: 14px">
+    <summary>Why the imaginary part = 2π × (winding around z=0)</summary>
+    <p>
+      $\int 2/z\,dz = 2 \log z$ along the path, where $\log$ is multi-valued. Tracking $\log z$
+      continuously along a path, the imaginary part jumps by $\Delta(\arg z)$, which is $2\pi$ times
+      the (signed) winding number around the origin. So:
+    </p>
+    <p>$$\int_C \frac{2}{z}\,dz = 2 \cdot i \cdot \Delta(\arg z) = 4\pi i \cdot (\text{winding}).$$</p>
+    <p>For the closed loop (winding 1) you get $4\pi i$ — exactly $2\pi i \cdot \text{Res}_{z=0}\,f$,
+       since the residue of $1+2/z$ at $0$ is 2. Cauchy's residue theorem in action.</p>
+  </details>
+</section>
+
+
+<!-- ────────── 4. STEP-BY-STEP MATH ────────── -->
+<section class="card">
+  <h3>The math, condensed</h3>
+  <h2>Solve it on paper</h2>
+
+  <div class="step">
+    <p><b>Step 1.</b> The integrand splits cleanly:
+       $\dfrac{z+2}{z} = 1 + \dfrac{2}{z}.$ Integrate the two pieces.</p>
+  </div>
+
+  <div class="step">
+    <p><b>Step 2 — first piece.</b> $\displaystyle\int_C 1\,dz$ is a perfect differential, so</p>
+    <p>$$\int_C 1\,dz = z(2\pi) - z(\pi) = 2 - (-2) = 4.$$</p>
+  </div>
+
+  <div class="step">
+    <p><b>Step 3 — second piece.</b> Plug in $z=2e^{i\theta}$, $dz = 2i e^{i\theta}\,d\theta$:</p>
+    <p>$$\int_C \frac{2}{z}\,dz
+       = \int_\pi^{2\pi} \frac{2}{2e^{i\theta}} \cdot 2i\,e^{i\theta}\,d\theta
+       = \int_\pi^{2\pi} 2i\,d\theta
+       = 2\pi i.$$</p>
+    <p style="color:var(--muted)">Notice the $e^{i\theta}$ cancels — that's why this is a textbook case.</p>
+  </div>
+
+  <div class="step ans-glow" style="margin-top: 14px">
+    <p style="font-size: 17px; margin: 0">
+      $$\int_C \frac{z+2}{z}\,dz \;=\; 4 + 2\pi i.$$
+    </p>
+  </div>
+</section>
+
+
+<!-- ────────── 5. RIEMANN SUM CONVERGENCE ────────── -->
+<section class="card">
+  <h3>Numerics</h3>
+  <h2>Riemann sum converges to $4 + 2\pi i$</h2>
+  <p style="color:var(--muted); margin: 4px 0 14px">
+    Increase $N$ — the orange tail (head-to-tail sum of $f(z_k)\Delta z_k$) walks closer to the
+    green target.
+  </p>
+  <div class="grid2">
+    <div class="canvas-host"><canvas id="riemann" width="540" height="540"></canvas></div>
+    <div>
+      <div class="row"><span class="badge">N segments&nbsp;=&nbsp;<span id="nLab" class="num">8</span></span></div>
+      <input id="nSlider" type="range" min="2" max="400" value="8" style="margin-top:10px"/>
+      <div class="stat" style="margin-top: 18px">
+        sum&nbsp;&nbsp;&nbsp;≈&nbsp;<span id="sumLab" class="num">—</span><br/>
+        target&nbsp;=&nbsp;<span class="num2">4.0000 + 6.2832 i</span><br/>
+        |error|&nbsp;=&nbsp;<span id="errLab" class="num">—</span>
+      </div>
+      <p style="color:var(--muted); font-size: 12px; margin-top: 16px">
+        Midpoint rule on θ. Convergence is second-order, so the error drops like $N^{-2}$.
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ────────── 6. 3D LANDSCAPE ────────── -->
+<section class="card">
+  <h3>3D view</h3>
+  <h2>$|f(z)|$ as a height map, with the contour drawn on top</h2>
+  <p style="color:var(--muted); margin: 4px 0 14px">
+    The pole at $z=0$ is the spike. The contour stays at $|z|=2$, riding a smooth ridge that climbs
+    from height 0 (at $z=-2$, where $f=0$) up to height 2 (at $z=2$, where $f=2$).
+    Drag to rotate, scroll to zoom.
+  </p>
+  <div class="canvas-host" style="height: 540px">
+    <div id="three" style="width: 100%; height: 100%; border-radius: 8px; overflow: hidden"></div>
+  </div>
+</section>
+
+
+<!-- ────────── CHEAT SHEET ────────── -->
+<section class="card tight">
+  <h3>cheat sheet</h3>
+  <ul style="margin: 8px 0 4px; padding-left: 18px; line-height: 1.65">
+    <li>$z = 2e^{i\theta}$, $\theta\!\in\![\pi,2\pi]$ ⇒ <b>lower semicircle of radius 2</b>, $-2 \to +2$.</li>
+    <li>Split: $\dfrac{z+2}{z} = 1 + \dfrac{2}{z}$.</li>
+    <li>$\int 1\,dz$ = endpoint difference = $4$.</li>
+    <li>$\int 2/z\,dz$: substitute, $e^{i\theta}$ cancels, gives $2i\cdot \pi = 2\pi i$.</li>
+    <li><b>Total: $4 + 2\pi i$.</b></li>
+  </ul>
+</section>
+
+</div>
+
+<!-- ──────────────────────── SCRIPTS ──────────────────────── -->
+<script>
+'use strict';
+
+const TAU = Math.PI * 2;
+
+// f(z) = (z+2)/z = 1 + 2/z
+function fOf(re, im) {
+  const m2 = re*re + im*im;
+  if (m2 < 1e-10) return [Infinity, Infinity];
+  return [ 1 + 2*re/m2, -2*im/m2 ];
+}
+
+function fmt(x, d=3) {
+  if (!isFinite(x)) return "∞";
+  if (Math.abs(x) < 1e-12) return (0).toFixed(d);
+  return x.toFixed(d);
+}
+function fmtC(re, im, d=3) {
+  if (!isFinite(re) || !isFinite(im)) return "∞";
+  const r = fmt(re, d);
+  const sign = im >= 0 ? "+" : "−";
+  return `${r} ${sign} ${fmt(Math.abs(im), d)} i`;
+}
+
+// HSL → RGB (returns [r, g, b] each 0..255)
+function hsl2rgb(h, s, l) {
+  h = ((h % 360) + 360) % 360;
+  const c = (1 - Math.abs(2*l - 1)) * s;
+  const hp = h / 60;
+  const x = c * (1 - Math.abs(hp % 2 - 1));
+  let r=0, g=0, b=0;
+  if (hp < 1)      { r=c; g=x; }
+  else if (hp < 2) { r=x; g=c; }
+  else if (hp < 3) { g=c; b=x; }
+  else if (hp < 4) { g=x; b=c; }
+  else if (hp < 5) { r=x; b=c; }
+  else             { r=c; b=x; }
+  const m = l - c/2;
+  return [Math.round((r+m)*255), Math.round((g+m)*255), Math.round((b+m)*255)];
+}
+
+// generic 2D plotter — sets up axes, returns a transform helper
+function setupPlane(ctx, W, H, opts) {
+  const cx = opts.cx ?? W/2, cy = opts.cy ?? H/2;
+  const scale = opts.scale;
+  ctx.fillStyle = opts.bg || "#11151d";
+  ctx.fillRect(0, 0, W, H);
+  // grid
+  ctx.strokeStyle = "#1f2533"; ctx.lineWidth = 1;
+  for (let n = -10; n <= 10; n++) {
+    if (n === 0) continue;
+    const px = cx + n*scale, py = cy + n*scale;
+    if (px >= 0 && px <= W) { ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, H); ctx.stroke(); }
+    if (py >= 0 && py <= H) { ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(W, py); ctx.stroke(); }
+  }
+  // axes
+  ctx.strokeStyle = "#3a4256"; ctx.lineWidth = 1.4;
+  ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(W, cy); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, H); ctx.stroke();
+  ctx.fillStyle = "#8a93a6"; ctx.font = "11px ui-monospace, Menlo, monospace";
+  ctx.fillText(opts.reLabel || "Re", W - 22, cy - 6);
+  ctx.fillText(opts.imLabel || "Im", cx + 6, 14);
+  // tick numbers
+  if (opts.ticks !== false) {
+    for (let n = -8; n <= 8; n++) {
+      if (n === 0) continue;
+      const px = cx + n*scale;
+      const py = cy - n*scale;
+      if (px > 6 && px < W - 6) ctx.fillText(String(n), px - 4, cy + 14);
+      if (py > 8 && py < H - 4) ctx.fillText(String(n), cx + 6, py + 4);
+    }
+  }
+  return {
+    cx, cy, scale,
+    toPx: (re, im) => [cx + re*scale, cy - im*scale]
+  };
+}
+
+function drawDot(ctx, x, y, r, fill, stroke) {
+  ctx.fillStyle = fill;
+  ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
+  if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 2; ctx.stroke(); }
+}
+
+function drawArrow(ctx, x, y, dx, dy, color, width = 1.5, headSize = 6) {
+  const len = Math.hypot(dx, dy);
+  if (len < 0.5) return;
+  ctx.strokeStyle = color; ctx.lineWidth = width;
+  ctx.fillStyle = color;
+  ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x+dx, y+dy); ctx.stroke();
+  const ang = Math.atan2(dy, dx);
+  ctx.save();
+  ctx.translate(x+dx, y+dy);
+  ctx.rotate(ang);
+  ctx.beginPath();
+  ctx.moveTo(0, 0); ctx.lineTo(-headSize, headSize*0.55); ctx.lineTo(-headSize, -headSize*0.55);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  1. SYNCHRONIZED TRIPLE PANEL
+// ════════════════════════════════════════════════════════════════
+(function () {
+  const cZ = document.getElementById("z3").getContext("2d");
+  const cW = document.getElementById("w3").getContext("2d");
+  const cA = document.getElementById("acc3").getContext("2d");
+
+  const slider = document.getElementById("th3");
+  const playBtn = document.getElementById("play3");
+  const resetBtn = document.getElementById("reset3");
+  const thLab = document.getElementById("thLab");
+  const zLab = document.getElementById("zLab");
+  const fLab = document.getElementById("fLab");
+  const accLab = document.getElementById("accLab");
+
+  let t = 0;        // 0..1 across [π, 2π]
+  let playing = false;
+
+  // PRECOMPUTE accumulated integral on a fine grid
+  const NG = 1000;
+  const acc = new Float64Array(NG + 1);   // real part
+  const acc2 = new Float64Array(NG + 1);  // imag part
+  for (let i = 1; i <= NG; i++) {
+    const th0 = Math.PI + Math.PI*(i-1)/NG;
+    const th1 = Math.PI + Math.PI*i/NG;
+    const thm = (th0+th1)/2;
+    const z0r = 2*Math.cos(th0), z0i = 2*Math.sin(th0);
+    const z1r = 2*Math.cos(th1), z1i = 2*Math.sin(th1);
+    const zmr = 2*Math.cos(thm), zmi = 2*Math.sin(thm);
+    const dzr = z1r - z0r, dzi = z1i - z0i;
+    const m2 = zmr*zmr + zmi*zmi;
+    const fr = 1 + 2*zmr/m2, fi = -2*zmi/m2;
+    const tr = fr*dzr - fi*dzi;
+    const ti = fr*dzi + fi*dzr;
+    acc[i] = acc[i-1] + tr;
+    acc2[i] = acc2[i-1] + ti;
+  }
+  // precompute the full image curve so we can draw it once
+  const imgPts = [];
+  for (let i = 0; i <= 400; i++) {
+    const th = Math.PI + Math.PI*i/400;
+    const zr = 2*Math.cos(th), zi = 2*Math.sin(th);
+    imgPts.push(fOf(zr, zi));
+  }
+  // precompute the integral path (head-to-tail running sum points)
+  const accPts = [];
+  for (let i = 0; i <= NG; i++) accPts.push([acc[i], acc2[i]]);
+
+  function drawZ(theta01) {
+    const W = 380, H = 380;
+    const ax = setupPlane(cZ, W, H, { scale: 70, reLabel: "Re z", imLabel: "Im z" });
+    // dashed full circle
+    cZ.strokeStyle = "#34466a"; cZ.setLineDash([3, 5]); cZ.lineWidth = 1;
+    cZ.beginPath(); cZ.arc(ax.cx, ax.cy, 2*ax.scale, 0, TAU); cZ.stroke();
+    cZ.setLineDash([]);
+    // singularity
+    drawDot(cZ, ax.cx, ax.cy, 4, "#fff");
+    cZ.fillStyle = "#fff"; cZ.font = "11px -apple-system,Inter";
+    cZ.fillText("z=0 (pole)", ax.cx + 8, ax.cy - 8);
+    // contour
+    cZ.strokeStyle = "#6ea8ff"; cZ.lineWidth = 2.5;
+    cZ.beginPath();
+    for (let i = 0; i <= 200; i++) {
+      const th = Math.PI + Math.PI*i/200;
+      const [px, py] = ax.toPx(2*Math.cos(th), 2*Math.sin(th));
+      if (i===0) cZ.moveTo(px, py); else cZ.lineTo(px, py);
+    }
+    cZ.stroke();
+    // direction tick arrows
+    cZ.fillStyle = "#6ea8ff";
+    for (let k = 1; k <= 4; k++) {
+      const th = Math.PI + Math.PI*k/5;
+      const [px, py] = ax.toPx(2*Math.cos(th), 2*Math.sin(th));
+      const ang = Math.atan2(-Math.cos(th), -Math.sin(th));
+      cZ.save(); cZ.translate(px, py); cZ.rotate(ang);
+      cZ.beginPath(); cZ.moveTo(0,0); cZ.lineTo(-7, 4); cZ.lineTo(-7, -4); cZ.closePath(); cZ.fill();
+      cZ.restore();
+    }
+    // start/end labels
+    {
+      const [px, py] = ax.toPx(-2, 0);
+      drawDot(cZ, px, py, 5, "#6ea8ff");
+      cZ.fillStyle = "#cfd4df"; cZ.font = "11px ui-monospace,Menlo,monospace";
+      cZ.fillText("z(π) = -2", px - 70, py - 8);
+    }
+    {
+      const [px, py] = ax.toPx(2, 0);
+      drawDot(cZ, px, py, 5, "#6ea8ff");
+      cZ.fillStyle = "#cfd4df";
+      cZ.fillText("z(2π) = 2", px + 6, py - 8);
+    }
+    // moving point + tangent
+    const theta = Math.PI + Math.PI*theta01;
+    const zr = 2*Math.cos(theta), zi = 2*Math.sin(theta);
+    const [px, py] = ax.toPx(zr, zi);
+    const tr = -2*Math.sin(theta), ti = 2*Math.cos(theta);
+    const [tpx, tpy] = ax.toPx(zr + 0.5*tr/2, zi + 0.5*ti/2);
+    drawArrow(cZ, px, py, tpx-px, tpy-py, "#7ee787", 2.5, 7);
+    drawDot(cZ, px, py, 7, "#ffb86b", "#1a1f2b");
+  }
+
+  function drawW(theta01) {
+    const W = 380, H = 380;
+    const ax = setupPlane(cW, W, H, { scale: 60, reLabel: "Re w", imLabel: "Im w" });
+    // image curve
+    cW.strokeStyle = "#6ea8ff"; cW.lineWidth = 2.5;
+    cW.beginPath();
+    for (let i = 0; i <= 400; i++) {
+      const [r, im] = imgPts[i];
+      const [px, py] = ax.toPx(r, im);
+      if (i===0) cW.moveTo(px, py); else cW.lineTo(px, py);
+    }
+    cW.stroke();
+    // direction arrows
+    cW.fillStyle = "#6ea8ff";
+    for (let k = 1; k <= 4; k++) {
+      const i = Math.floor(400 * k / 5);
+      const [r0, im0] = imgPts[i];
+      const [r1, im1] = imgPts[i+1];
+      const [px, py] = ax.toPx(r0, im0);
+      const dx = (r1-r0), dy = -(im1-im0);
+      const ang = Math.atan2(dy, dx);
+      cW.save(); cW.translate(px, py); cW.rotate(ang);
+      cW.beginPath(); cW.moveTo(0,0); cW.lineTo(-7,4); cW.lineTo(-7,-4); cW.closePath(); cW.fill();
+      cW.restore();
+    }
+    // endpoints
+    {
+      const [r, im] = imgPts[0];
+      const [px, py] = ax.toPx(r, im);
+      drawDot(cW, px, py, 5, "#6ea8ff");
+      cW.fillStyle = "#cfd4df"; cW.font = "11px ui-monospace,Menlo,monospace";
+      cW.fillText("f(-2) = 0", px + 7, py + 16);
+    }
+    {
+      const [r, im] = imgPts[400];
+      const [px, py] = ax.toPx(r, im);
+      drawDot(cW, px, py, 5, "#6ea8ff");
+      cW.fillStyle = "#cfd4df";
+      cW.fillText("f(2) = 2", px + 7, py - 6);
+    }
+    // moving point
+    const theta = Math.PI + Math.PI*theta01;
+    const zr = 2*Math.cos(theta), zi = 2*Math.sin(theta);
+    const [fr, fi] = fOf(zr, zi);
+    const [px, py] = ax.toPx(fr, fi);
+    drawDot(cW, px, py, 7, "#ffb86b", "#1a1f2b");
+  }
+
+  function drawAcc(theta01) {
+    const W = 380, H = 380;
+    // place origin in lower-left so the path has room to grow
+    const ax = setupPlane(cA, W, H, { cx: 60, cy: H - 50, scale: 38, reLabel: "Re", imLabel: "Im" });
+    // target marker
+    {
+      const [px, py] = ax.toPx(4, 2*Math.PI);
+      cA.strokeStyle = "#7ee787"; cA.lineWidth = 1.5;
+      cA.beginPath(); cA.arc(px, py, 10, 0, TAU); cA.stroke();
+      cA.fillStyle = "#7ee787"; cA.font = "11px ui-monospace,Menlo,monospace";
+      cA.fillText("4 + 2πi", px + 14, py + 4);
+    }
+    // path so far
+    const N = Math.max(1, Math.floor(theta01 * NG));
+    cA.strokeStyle = "#ffb86b"; cA.lineWidth = 2.5;
+    cA.beginPath();
+    for (let i = 0; i <= N; i++) {
+      const [r, im] = accPts[i];
+      const [px, py] = ax.toPx(r, im);
+      if (i===0) cA.moveTo(px, py); else cA.lineTo(px, py);
+    }
+    cA.stroke();
+    // ghost rest of the path
+    cA.strokeStyle = "rgba(255,184,107,0.18)"; cA.lineWidth = 1.5;
+    cA.beginPath();
+    for (let i = N; i <= NG; i++) {
+      const [r, im] = accPts[i];
+      const [px, py] = ax.toPx(r, im);
+      if (i===N) cA.moveTo(px, py); else cA.lineTo(px, py);
+    }
+    cA.stroke();
+    // current head
+    const [r, im] = accPts[N];
+    const [px, py] = ax.toPx(r, im);
+    drawDot(cA, px, py, 6, "#ffb86b", "#1a1f2b");
+    // dashed line origin → head, to emphasize "this is a complex number"
+    cA.strokeStyle = "rgba(255,184,107,0.35)"; cA.setLineDash([3,4]); cA.lineWidth = 1.2;
+    const [ox, oy] = ax.toPx(0, 0);
+    cA.beginPath(); cA.moveTo(ox, oy); cA.lineTo(px, py); cA.stroke();
+    cA.setLineDash([]);
+  }
+
+  function update() {
+    drawZ(t); drawW(t); drawAcc(t);
+    // labels
+    let thStr;
+    if (t === 0) thStr = "π";
+    else if (t === 1) thStr = "2π";
+    else thStr = (1 + t).toFixed(2) + "π";
+    thLab.textContent = thStr;
+    const theta = Math.PI + Math.PI*t;
+    const zr = 2*Math.cos(theta), zi = 2*Math.sin(theta);
+    zLab.textContent = fmtC(zr, zi, 3);
+    const [fr, fi] = fOf(zr, zi);
+    fLab.textContent = isFinite(fr) ? fmtC(fr, fi, 3) : "∞";
+    const N = Math.max(0, Math.floor(t * NG));
+    accLab.textContent = fmtC(accPts[N][0], accPts[N][1], 3);
+  }
+
+  slider.addEventListener("input", () => { t = +slider.value / 1000; update(); });
+  resetBtn.addEventListener("click", () => { t = 0; slider.value = 0; update(); });
+
+  let lastTime = 0;
+  function animate(now) {
+    if (!playing) return;
+    const dt = lastTime ? (now - lastTime)/1000 : 0;
+    lastTime = now;
+    t = t + dt * 0.25; // 4 seconds end-to-end
+    if (t >= 1) { t = 1; playing = false; playBtn.textContent = "▶ play"; }
+    slider.value = t * 1000;
+    update();
+    if (playing) requestAnimationFrame(animate);
+  }
+  playBtn.addEventListener("click", () => {
+    playing = !playing;
+    playBtn.textContent = playing ? "⏸ pause" : "▶ play";
+    if (playing) {
+      if (t >= 1) t = 0;
+      lastTime = 0;
+      requestAnimationFrame(animate);
+    }
+  });
+
+  // Auto-play once on load
+  setTimeout(() => {
+    playing = true; playBtn.textContent = "⏸ pause";
+    lastTime = 0;
+    requestAnimationFrame(animate);
+  }, 800);
+
+  update();
+})();
+
+
+// ════════════════════════════════════════════════════════════════
+//  2. DOMAIN COLORING + VECTOR FIELD
+// ════════════════════════════════════════════════════════════════
+(function () {
+  const cv = document.getElementById("dom");
+  const ctx = cv.getContext("2d");
+  const W = cv.width, H = cv.height;
+  const half = 4;
+  const scale = (W/2) / half;
+  const cx = W/2, cy = H/2;
+
+  const tContour = document.getElementById("t-contour");
+  const tGrid    = document.getElementById("t-grid");
+  const tDz      = document.getElementById("t-dz");
+  const tProd    = document.getElementById("t-prod");
+  const state = { contour: true, grid: true, dz: false, prod: false };
+
+  // Render the domain coloring once into a buffer
+  const img = ctx.createImageData(W, H);
+  for (let py = 0; py < H; py++) {
+    for (let px = 0; px < W; px++) {
+      const re = (px - cx)/scale;
+      const im = -(py - cy)/scale;
+      const m2 = re*re + im*im;
+      const idx = (py*W + px)*4;
+      if (m2 < 1e-6) {
+        img.data[idx]=255; img.data[idx+1]=255; img.data[idx+2]=255; img.data[idx+3]=255;
+        continue;
+      }
+      const fr = 1 + 2*re/m2;
+      const fi = -2*im/m2;
+      const arg = Math.atan2(fi, fr);
+      const mod = Math.hypot(fr, fi);
+      let h = (arg + Math.PI) / TAU * 360;
+      // log2 banding for modulus
+      const logm = Math.log2(mod + 1e-12);
+      const frac = logm - Math.floor(logm);
+      // base lightness with a soft band, plus brighten near zero/pole
+      let l = 0.42 + 0.20*frac;
+      // saturate
+      let s = 0.85;
+      // additional argument banding (faint)
+      const argBand = ((arg + Math.PI)/(TAU/12)) % 1;
+      l += 0.04 * Math.sin(argBand * TAU);
+      // contrast for very large or very small modulus
+      if (mod > 50) l = Math.min(0.92, l + 0.15);
+      if (mod < 0.05) l = Math.max(0.06, l - 0.25);
+      const [r,g,b] = hsl2rgb(h, s, Math.max(0, Math.min(1, l)));
+      img.data[idx] = r; img.data[idx+1] = g; img.data[idx+2] = b; img.data[idx+3] = 255;
+    }
+  }
+  // background buffer
+  const bg = document.createElement("canvas");
+  bg.width = W; bg.height = H;
+  bg.getContext("2d").putImageData(img, 0, 0);
+
+  function draw() {
+    ctx.drawImage(bg, 0, 0);
+    // axes
+    ctx.strokeStyle = "rgba(255,255,255,0.18)"; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(W, cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, H); ctx.stroke();
+    // ticks
+    ctx.fillStyle = "rgba(255,255,255,0.55)"; ctx.font = "11px ui-monospace,Menlo,monospace";
+    for (let n = -3; n <= 3; n++) {
+      if (n === 0) continue;
+      ctx.fillText(String(n), cx + n*scale - 4, cy + 14);
+      ctx.fillText(String(n), cx + 6, cy - n*scale + 4);
+    }
+    // pole
+    drawDot(ctx, cx, cy, 5, "#fff", "#0b0e14");
+    // zero of f at z = -2
+    drawDot(ctx, cx + (-2)*scale, cy, 5, "#222", "#fff");
+
+    if (state.grid) {
+      // f(z) vector field on a coarse grid
+      const step = 26;
+      for (let py = step; py < H; py += step) {
+        for (let px = step; px < W; px += step) {
+          const re = (px - cx)/scale;
+          const im = -(py - cy)/scale;
+          const [fr, fi] = fOf(re, im);
+          if (!isFinite(fr)) continue;
+          // arrow length: clamped
+          const len = Math.hypot(fr, fi);
+          if (len < 0.01) continue;
+          const k = Math.min(1, 0.12) * 22;  // visual scale
+          let dx = fr / Math.max(1, len) * 10;
+          let dy = -fi / Math.max(1, len) * 10;
+          // boost a bit if length < 1.5 to keep arrows visible
+          ctx.globalAlpha = 0.7;
+          drawArrow(ctx, px, py, dx, dy, "#cfd4df", 1, 4);
+          ctx.globalAlpha = 1;
+        }
+      }
+    }
+
+    if (state.contour) {
+      // contour C
+      ctx.strokeStyle = "#ffb86b"; ctx.lineWidth = 3;
+      ctx.beginPath();
+      for (let i = 0; i <= 240; i++) {
+        const th = Math.PI + Math.PI*i/240;
+        const re = 2*Math.cos(th), im = 2*Math.sin(th);
+        const px = cx + re*scale, py = cy - im*scale;
+        if (i===0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+      // direction
+      ctx.fillStyle = "#ffb86b";
+      for (let k = 1; k <= 5; k++) {
+        const th = Math.PI + Math.PI*k/6;
+        const re = 2*Math.cos(th), im = 2*Math.sin(th);
+        const px = cx + re*scale, py = cy - im*scale;
+        const ang = Math.atan2(-Math.cos(th), -Math.sin(th));
+        ctx.save(); ctx.translate(px, py); ctx.rotate(ang);
+        ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-8, 5); ctx.lineTo(-8, -5);
+        ctx.closePath(); ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // dz arrows along contour
+    if (state.dz || state.prod) {
+      const NS = 16;
+      for (let k = 0; k < NS; k++) {
+        const th = Math.PI + Math.PI*(k+0.5)/NS;
+        const zr = 2*Math.cos(th), zi = 2*Math.sin(th);
+        const px = cx + zr*scale, py = cy - zi*scale;
+        // dz = z' dθ where dθ = π/NS
+        const dth = Math.PI / NS;
+        const dzr = -2*Math.sin(th)*dth, dzi = 2*Math.cos(th)*dth;
+        if (state.dz) {
+          drawArrow(ctx, px, py, dzr*scale, -dzi*scale, "#6ea8ff", 1.6, 5);
+        }
+        if (state.prod) {
+          const [fr, fi] = fOf(zr, zi);
+          // f * dz (complex mult)
+          const tr = fr*dzr - fi*dzi;
+          const ti = fr*dzi + fi*dzr;
+          drawArrow(ctx, px, py, tr*scale, -ti*scale, "#7ee787", 1.8, 5);
+        }
+      }
+    }
+  }
+
+  function setBtn(btn, key) {
+    btn.addEventListener("click", () => {
+      state[key] = !state[key];
+      btn.classList.toggle("active", state[key]);
+      draw();
+    });
+  }
+  setBtn(tContour, "contour");
+  setBtn(tGrid, "grid");
+  setBtn(tDz, "dz");
+  setBtn(tProd, "prod");
+
+  draw();
+})();
+
+
+// ════════════════════════════════════════════════════════════════
+//  3. PATH COMPARISON
+// ════════════════════════════════════════════════════════════════
+(function () {
+  const cZ = document.getElementById("pthZ").getContext("2d");
+  const cW = document.getElementById("pthW").getContext("2d");
+  const cA = document.getElementById("pthAcc").getContext("2d");
+  const ans = document.getElementById("pthAns");
+  const ansN = document.getElementById("pthAnsN");
+  const wind = document.getElementById("windLab");
+
+  // four named paths from -2 to 2 (or closed). Each returns {points, closed, exact, exactN, winding}.
+  // For each path we compute z(t) for t in [0,1] sampled densely, then accumulate the integral.
+  const NS = 1200;
+  function makePath(name) {
+    const pts = new Array(NS + 1);
+    let info = { exact: "", exactN: "", winding: 0, closed: false };
+    if (name === "lower") {
+      for (let i = 0; i <= NS; i++) {
+        const th = Math.PI + Math.PI*i/NS;
+        pts[i] = [2*Math.cos(th), 2*Math.sin(th)];
+      }
+      info.exact = "4 + 2π i"; info.exactN = "4.0000 + 6.2832 i"; info.winding = "−1/2";
+    } else if (name === "upper") {
+      for (let i = 0; i <= NS; i++) {
+        const th = Math.PI - Math.PI*i/NS;
+        pts[i] = [2*Math.cos(th), 2*Math.sin(th)];
+      }
+      info.exact = "4 − 2π i"; info.exactN = "4.0000 − 6.2832 i"; info.winding = "+1/2";
+    } else if (name === "closed") {
+      // full circle, counterclockwise, starting at -2 and going DOWN first (so it matches the
+      // problem's lower-semicircle direction, then continues up)
+      for (let i = 0; i <= NS; i++) {
+        const th = Math.PI + 2*Math.PI*i/NS;  // π → 3π
+        pts[i] = [2*Math.cos(th), 2*Math.sin(th)];
+      }
+      info.exact = "4π i"; info.exactN = "0.0000 + 12.5664 i"; info.winding = "−1"; info.closed = true;
+    } else if (name === "zigzag") {
+      // -2 → -2+3i → 2+3i → 2  (a path that goes well above the pole)
+      const segLen = NS / 3;
+      for (let i = 0; i <= NS; i++) {
+        const u = i / NS;
+        if (u <= 1/3) {
+          const s = u * 3;
+          pts[i] = [-2, 0 + s*3];
+        } else if (u <= 2/3) {
+          const s = (u - 1/3)*3;
+          pts[i] = [-2 + s*4, 3];
+        } else {
+          const s = (u - 2/3)*3;
+          pts[i] = [2, 3 - s*3];
+        }
+      }
+      info.exact = "4 − 2π i"; info.exactN = "4.0000 − 6.2832 i"; info.winding = "+1/2";
+    }
+    // accumulate integral via midpoint rule on segments
+    const acc = [[0,0]];
+    let sR = 0, sI = 0;
+    for (let i = 1; i <= NS; i++) {
+      const [r0, im0] = pts[i-1];
+      const [r1, im1] = pts[i];
+      const mr = (r0+r1)/2, mi = (im0+im1)/2;
+      const dzr = r1-r0, dzi = im1-im0;
+      const m2 = mr*mr + mi*mi;
+      const fr = 1 + 2*mr/m2, fi = -2*mi/m2;
+      const tr = fr*dzr - fi*dzi;
+      const ti = fr*dzi + fi*dzr;
+      sR += tr; sI += ti;
+      acc.push([sR, sI]);
+    }
+    return { name, points: pts, acc, info };
+  }
+
+  const cache = {};
+  function get(name) { return cache[name] ||= makePath(name); }
+
+  function drawPath(path) {
+    // ---- z-plane ----
+    const W = 380, H = 380;
+    const axZ = setupPlane(cZ, W, H, { scale: 60, reLabel: "Re z", imLabel: "Im z" });
+    drawDot(cZ, axZ.cx, axZ.cy, 4, "#fff");
+    cZ.fillStyle = "#fff"; cZ.font = "11px -apple-system,Inter";
+    cZ.fillText("pole", axZ.cx + 6, axZ.cy - 7);
+    // dashed |z|=2 ref
+    cZ.strokeStyle = "#34466a"; cZ.setLineDash([3, 5]); cZ.lineWidth = 1;
+    cZ.beginPath(); cZ.arc(axZ.cx, axZ.cy, 2*axZ.scale, 0, TAU); cZ.stroke();
+    cZ.setLineDash([]);
+    // path
+    cZ.strokeStyle = "#6ea8ff"; cZ.lineWidth = 2.6;
+    cZ.beginPath();
+    for (let i = 0; i <= NS; i++) {
+      const [r, im] = path.points[i];
+      const [px, py] = axZ.toPx(r, im);
+      if (i===0) cZ.moveTo(px, py); else cZ.lineTo(px, py);
+    }
+    cZ.stroke();
+    // direction arrows
+    cZ.fillStyle = "#6ea8ff";
+    const arrowsAt = [0.18, 0.38, 0.58, 0.78, 0.93];
+    for (const u of arrowsAt) {
+      const i = Math.floor(u * NS);
+      const [r0, im0] = path.points[i];
+      const [r1, im1] = path.points[Math.min(NS, i+1)];
+      const dx = (r1-r0), dy = -(im1-im0);
+      if (Math.hypot(dx, dy) < 1e-5) continue;
+      const ang = Math.atan2(dy, dx);
+      const [px, py] = axZ.toPx(r0, im0);
+      cZ.save(); cZ.translate(px, py); cZ.rotate(ang);
+      cZ.beginPath(); cZ.moveTo(0,0); cZ.lineTo(-8, 5); cZ.lineTo(-8, -5);
+      cZ.closePath(); cZ.fill();
+      cZ.restore();
+    }
+    // endpoints
+    {
+      const [r, im] = path.points[0];
+      const [px, py] = axZ.toPx(r, im);
+      drawDot(cZ, px, py, 5, "#7ee787");
+    }
+    {
+      const [r, im] = path.points[NS];
+      const [px, py] = axZ.toPx(r, im);
+      drawDot(cZ, px, py, 5, "#ffb86b");
+    }
+
+    // ---- w-plane ----
+    const axW = setupPlane(cW, W, H, { scale: 50, reLabel: "Re w", imLabel: "Im w" });
+    cW.strokeStyle = "#6ea8ff"; cW.lineWidth = 2.6;
+    cW.beginPath();
+    for (let i = 0; i <= NS; i++) {
+      const [r, im] = path.points[i];
+      const [fr, fi] = fOf(r, im);
+      if (!isFinite(fr)) continue;
+      const [px, py] = axW.toPx(fr, fi);
+      if (i===0) cW.moveTo(px, py); else cW.lineTo(px, py);
+    }
+    cW.stroke();
+    cW.fillStyle = "#6ea8ff";
+    for (const u of arrowsAt) {
+      const i = Math.floor(u * NS);
+      const [r0, im0] = path.points[i];
+      const [r1, im1] = path.points[Math.min(NS, i+1)];
+      const [a0, b0] = fOf(r0, im0);
+      const [a1, b1] = fOf(r1, im1);
+      if (!isFinite(a0)) continue;
+      const dx = a1-a0, dy = -(b1-b0);
+      if (Math.hypot(dx, dy) < 1e-5) continue;
+      const ang = Math.atan2(dy, dx);
+      const [px, py] = axW.toPx(a0, b0);
+      cW.save(); cW.translate(px, py); cW.rotate(ang);
+      cW.beginPath(); cW.moveTo(0,0); cW.lineTo(-8, 5); cW.lineTo(-8, -5);
+      cW.closePath(); cW.fill();
+      cW.restore();
+    }
+
+    // ---- accumulator ----
+    const Wa = 380, Ha = 380;
+    // adapt origin/scale to fit the path
+    const accPts = path.acc;
+    let minR = 0, maxR = 0, minI = 0, maxI = 0;
+    for (const [r, im] of accPts) {
+      if (r < minR) minR = r; if (r > maxR) maxR = r;
+      if (im < minI) minI = im; if (im > maxI) maxI = im;
+    }
+    const padR = Math.max(0.5, (maxR - minR) * 0.15);
+    const padI = Math.max(0.5, (maxI - minI) * 0.15);
+    const xRange = (maxR + padR) - (minR - padR);
+    const yRange = (maxI + padI) - (minI - padI);
+    const sX = (Wa - 70) / xRange;
+    const sY = (Ha - 70) / yRange;
+    const scale = Math.min(sX, sY);
+    const cxA = 50 - (minR - padR) * scale;
+    const cyA = (Ha - 50) + (minI - padI) * scale;
+    setupPlane(cA, Wa, Ha, { cx: cxA, cy: cyA, scale, reLabel: "Re", imLabel: "Im" });
+    // target marker at exact answer (from path.info — parse it)
+    let exR = 0, exI = 0;
+    if (path.name === "lower") { exR = 4; exI = 2*Math.PI; }
+    else if (path.name === "upper") { exR = 4; exI = -2*Math.PI; }
+    else if (path.name === "closed") { exR = 0; exI = 4*Math.PI; }
+    else if (path.name === "zigzag") { exR = 4; exI = -2*Math.PI; }
+    {
+      const [px, py] = [cxA + exR*scale, cyA - exI*scale];
+      cA.strokeStyle = "#7ee787"; cA.lineWidth = 1.5;
+      cA.beginPath(); cA.arc(px, py, 10, 0, TAU); cA.stroke();
+      cA.fillStyle = "#7ee787"; cA.font = "11px ui-monospace,Menlo,monospace";
+      cA.fillText(path.info.exact, px + 14, py + 4);
+    }
+    // path
+    cA.strokeStyle = "#ffb86b"; cA.lineWidth = 2.5;
+    cA.beginPath();
+    for (let i = 0; i <= NS; i++) {
+      const [r, im] = accPts[i];
+      const px = cxA + r*scale, py = cyA - im*scale;
+      if (i===0) cA.moveTo(px, py); else cA.lineTo(px, py);
+    }
+    cA.stroke();
+    // start at origin
+    drawDot(cA, cxA, cyA, 5, "#7ee787");
+    // end
+    {
+      const [r, im] = accPts[NS];
+      drawDot(cA, cxA + r*scale, cyA - im*scale, 6, "#ffb86b", "#1a1f2b");
+    }
+
+    // labels
+    ans.textContent = path.info.exact;
+    ansN.textContent = path.info.exactN;
+    wind.textContent = path.info.winding;
+  }
+
+  const btns = document.querySelectorAll(".path-btn");
+  btns.forEach(b => {
+    b.addEventListener("click", () => {
+      btns.forEach(x => x.classList.remove("active"));
+      b.classList.add("active");
+      drawPath(get(b.dataset.path));
+    });
+  });
+
+  drawPath(get("lower"));
+})();
+
+
+// ════════════════════════════════════════════════════════════════
+//  4. RIEMANN SUM CONVERGENCE
+// ════════════════════════════════════════════════════════════════
+(function () {
+  const cv = document.getElementById("riemann");
+  const ctx = cv.getContext("2d");
+  const W = cv.width, H = cv.height;
+  const slider = document.getElementById("nSlider");
+  const nLab = document.getElementById("nLab");
+  const sumLab = document.getElementById("sumLab");
+  const errLab = document.getElementById("errLab");
+
+  function draw(N) {
+    // place the contour on the left-center, the answer on the right
+    const ax = setupPlane(ctx, W, H, { cx: W*0.34, cy: H*0.55, scale: 65, reLabel: "Re", imLabel: "Im" });
+    // dashed circle reference
+    ctx.strokeStyle = "#34466a"; ctx.setLineDash([3, 5]); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(ax.cx, ax.cy, 2*ax.scale, 0, TAU); ctx.stroke();
+    ctx.setLineDash([]);
+    drawDot(ctx, ax.cx, ax.cy, 4, "#fff");
+    // contour
+    ctx.strokeStyle = "#34466a"; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let i = 0; i <= 200; i++) {
+      const th = Math.PI + Math.PI*i/200;
+      const [px, py] = ax.toPx(2*Math.cos(th), 2*Math.sin(th));
+      if (i===0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+
+    let sR = 0, sI = 0, curR = 0, curI = 0;
+    ctx.strokeStyle = "#ffb86b"; ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    let [px0, py0] = ax.toPx(0, 0);
+    ctx.moveTo(px0, py0);
+
+    for (let k = 0; k < N; k++) {
+      const th0 = Math.PI + Math.PI*k/N;
+      const th1 = Math.PI + Math.PI*(k+1)/N;
+      const thm = (th0+th1)/2;
+      const z0r = 2*Math.cos(th0), z0i = 2*Math.sin(th0);
+      const z1r = 2*Math.cos(th1), z1i = 2*Math.sin(th1);
+      const zmr = 2*Math.cos(thm), zmi = 2*Math.sin(thm);
+      const dzr = z1r-z0r, dzi = z1i-z0i;
+      const m2 = zmr*zmr + zmi*zmi;
+      const fr = 1 + 2*zmr/m2, fi = -2*zmi/m2;
+      const tr = fr*dzr - fi*dzi;
+      const ti = fr*dzi + fi*dzr;
+      sR += tr; sI += ti;
+      // tiny indicator arrow at midpoint of segment
+      if (N <= 80) {
+        const mx = (z0r+z1r)/2, my = (z0i+z1i)/2;
+        const [pmx, pmy] = ax.toPx(mx, my);
+        const arrSc = 0.4;
+        const ar = tr*ax.scale*arrSc, ai = -ti*ax.scale*arrSc;
+        ctx.save();
+        ctx.strokeStyle = "rgba(126,231,135,0.6)"; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(pmx, pmy); ctx.lineTo(pmx+ar, pmy+ai); ctx.stroke();
+        ctx.restore();
+      }
+      curR += tr; curI += ti;
+      const [pn, pm] = ax.toPx(curR, curI);
+      ctx.lineTo(pn, pm);
+    }
+    ctx.stroke();
+    // final dot
+    {
+      const [px, py] = ax.toPx(sR, sI);
+      drawDot(ctx, px, py, 6, "#ffb86b", "#1a1f2b");
+    }
+    // target
+    {
+      const [px, py] = ax.toPx(4, 2*Math.PI);
+      ctx.strokeStyle = "#7ee787"; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(px, py, 10, 0, TAU); ctx.stroke();
+      ctx.fillStyle = "#7ee787"; ctx.font = "11px ui-monospace,Menlo,monospace";
+      ctx.fillText("4 + 2π i", px + 14, py + 4);
+    }
+    nLab.textContent = N;
+    sumLab.textContent = fmtC(sR, sI, 4);
+    errLab.textContent = Math.hypot(sR-4, sI-2*Math.PI).toExponential(2);
+  }
+
+  slider.addEventListener("input", () => draw(+slider.value));
+  draw(+slider.value);
+})();
+
+
+// ════════════════════════════════════════════════════════════════
+//  5. THREE.JS 3D LANDSCAPE
+// ════════════════════════════════════════════════════════════════
+(function () {
+  const host = document.getElementById("three");
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0b0e14);
+  const camera = new THREE.PerspectiveCamera(45, host.clientWidth/host.clientHeight, 0.1, 100);
+  camera.position.set(5, 4.5, 6.5);
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(host.clientWidth, host.clientHeight);
+  host.appendChild(renderer.domElement);
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.target.set(0, 1, 0);
+  controls.enableDamping = true;
+  scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+  const dir = new THREE.DirectionalLight(0xffffff, 0.85);
+  dir.position.set(5, 8, 4);
+  scene.add(dir);
+
+  function lineSeg(p1, p2, color = 0x556070) {
+    const m = new THREE.LineBasicMaterial({ color });
+    const g = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(...p1), new THREE.Vector3(...p2)
+    ]);
+    return new THREE.Line(g, m);
+  }
+  scene.add(lineSeg([-3.5,0,0],[3.5,0,0]));
+  scene.add(lineSeg([0,0,-3.5],[0,0,3.5]));
+  scene.add(lineSeg([0,0,0],[0,6,0]));
+  const grid = new THREE.GridHelper(7, 14, 0x2a3140, 0x2a3140);
+  grid.material.opacity = 0.5; grid.material.transparent = true;
+  scene.add(grid);
+
+  const N = 140;
+  const half = 3.2;
+  const cap = 6.0;
+  const verts = [], cols = [], idx = [];
+  function fmag(re, im) {
+    const m2 = re*re + im*im;
+    if (m2 < 1e-4) return cap;
+    const fr = 1 + 2*re/m2;
+    const fi = -2*im/m2;
+    return Math.min(cap, Math.hypot(fr, fi));
+  }
+  for (let i = 0; i <= N; i++) {
+    for (let j = 0; j <= N; j++) {
+      const x = -half + (2*half) * i/N;
+      const z = -half + (2*half) * j/N;
+      const h = fmag(x, z);
+      verts.push(x, h, z);
+      const tt = Math.min(1, h/cap);
+      cols.push(0.42 + 0.55*tt, 0.66 - 0.30*tt, 1.0 - 0.65*tt);
+    }
+  }
+  for (let i = 0; i < N; i++) {
+    for (let j = 0; j < N; j++) {
+      const a = i*(N+1) + j, b = a+1, c = a+(N+1), d = c+1;
+      idx.push(a, c, b,  b, c, d);
+    }
+  }
+  const geom = new THREE.BufferGeometry();
+  geom.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+  geom.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+  geom.setIndex(idx);
+  geom.computeVertexNormals();
+  scene.add(new THREE.Mesh(geom, new THREE.MeshStandardMaterial({
+    vertexColors: true, side: THREE.DoubleSide, metalness: 0.05, roughness: 0.85,
+    transparent: true, opacity: 0.92
+  })));
+
+  // wireframe overlay
+  const wv = [];
+  for (let i = 0; i <= N; i += 6) for (let j = 0; j < N; j++) {
+    const x = -half + (2*half)*i/N;
+    const z0 = -half + (2*half)*j/N, z1 = -half + (2*half)*(j+1)/N;
+    wv.push(x, fmag(x,z0), z0,  x, fmag(x,z1), z1);
+  }
+  for (let j = 0; j <= N; j += 6) for (let i = 0; i < N; i++) {
+    const z = -half + (2*half)*j/N;
+    const x0 = -half + (2*half)*i/N, x1 = -half + (2*half)*(i+1)/N;
+    wv.push(x0, fmag(x0,z), z,  x1, fmag(x1,z), z);
+  }
+  scene.add(new THREE.LineSegments(
+    new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(wv, 3)),
+    new THREE.LineBasicMaterial({ color: 0x3a4f7a, transparent: true, opacity: 0.32 })
+  ));
+
+  // contour
+  const cPts = [];
+  for (let i = 0; i <= 200; i++) {
+    const th = Math.PI + Math.PI*i/200;
+    const x = 2*Math.cos(th), z = 2*Math.sin(th);
+    cPts.push(new THREE.Vector3(x, fmag(x, z) + 0.04, z));
+  }
+  scene.add(new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints(cPts),
+    new THREE.LineBasicMaterial({ color: 0xffb86b })
+  ));
+  scene.add(new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints(cPts.map(p => new THREE.Vector3(p.x, 0.01, p.z))),
+    new THREE.LineBasicMaterial({ color: 0x6ea8ff })
+  ));
+  // pole spike
+  const pole = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.04, 0.04, 6, 16),
+    new THREE.MeshBasicMaterial({ color: 0xff6b6b })
+  );
+  pole.position.set(0, 3, 0);
+  scene.add(pole);
+
+  // moving point along the contour
+  const ball = new THREE.Mesh(
+    new THREE.SphereGeometry(0.12, 16, 16),
+    new THREE.MeshStandardMaterial({ color: 0xffb86b, emissive: 0xffb86b, emissiveIntensity: 0.6 })
+  );
+  scene.add(ball);
+
+  function resize() {
+    const w = host.clientWidth, h = host.clientHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w/h; camera.updateProjectionMatrix();
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  const startTime = performance.now();
+  function animate() {
+    const t = ((performance.now() - startTime) / 5000) % 1;
+    const idx = Math.floor(t * 200);
+    const p = cPts[idx];
+    ball.position.copy(p);
+    controls.update();
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+</script>
+</body>
+</html>
