@@ -11,8 +11,8 @@
   };
 </script>
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.140.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.140.0/examples/js/controls/OrbitControls.js"></script>
 <style>
   :root {
     --bg: #0b0e14;
@@ -1503,6 +1503,11 @@ function drawArrow(ctx, x, y, dx, dy, color, width = 1.5, headSize = 6) {
 //  5. THREE.JS 3D LANDSCAPE
 // ════════════════════════════════════════════════════════════════
 (function () {
+  try {
+  if (typeof THREE === "undefined" || !THREE.OrbitControls) {
+    console.warn("three.js or OrbitControls failed to load; skipping 3D landscape");
+    return;
+  }
   const host = document.getElementById("three");
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0b0e14);
@@ -1637,6 +1642,9 @@ function drawArrow(ctx, x, y, dx, dy, color, width = 1.5, headSize = 6) {
     requestAnimationFrame(animate);
   }
   animate();
+  } catch (err) {
+    console.warn("3D landscape failed to initialize:", err);
+  }
 })();
 
 
