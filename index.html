@@ -148,6 +148,7 @@
 <nav class="tabs" id="tabnav">
   <button class="tab active" data-tab="p1">Problem 1 &nbsp;·&nbsp; ∫<sub>C</sub> (z+2)/z dz</button>
   <button class="tab" data-tab="p2">Problem 2 &nbsp;·&nbsp; ∫<sub>C</sub> z<sup>i</sup> dz</button>
+  <button class="tab" data-tab="p3">Problem 3 &nbsp;·&nbsp; ML inequality</button>
 </nav>
 
 
@@ -591,7 +592,7 @@
 
 
 <!-- ────────── F. QUIZ ────────── -->
-<section class="card">
+<section class="card quiz-card">
   <h3>Concept check · 5 questions</h3>
   <h2>Test your understanding</h2>
   <p style="color: var(--muted); margin: 4px 0 14px">Click an answer. Green = correct, red = wrong, explanation appears.</p>
@@ -661,7 +662,7 @@
   </div>
 
   <div class="quiz-score">
-    Score: <span id="qscore">0</span> / 5 &nbsp;·&nbsp; <span id="qmessage" style="color:var(--muted)">answer all five</span>
+    Score: <span class="qscore">0</span> / 5 &nbsp;·&nbsp; <span class="qmessage" style="color:var(--muted)">answer all five</span>
   </div>
 </section>
 
@@ -679,6 +680,258 @@
 </section>
 
 </div><!-- /p2 -->
+
+
+<div id="p3" class="tab-content">
+
+<!-- ─── HERO ─── -->
+<h1>ML inequality — bound a contour integral without computing it</h1>
+<p class="lede">
+  Problem 3. Let $C$ denote the line segment from $z = i$ to $z = 1$. Prove that
+  $\displaystyle\left|\int_C \frac{dz}{z^4}\right| \le 4\sqrt{2}$.
+</p>
+<div class="answer-banner">
+  Strategy: ML inequality with $M = \max_C |1/z^4| = 4$ and $L = \sqrt{2}$, giving $M\cdot L = 4\sqrt{2}$.
+</div>
+
+
+<!-- ────────── A. ML INEQUALITY EXPLAINER ────────── -->
+<section class="card">
+  <h3>Concept 1 · the ML inequality</h3>
+  <h2>The most useful estimation tool in complex analysis</h2>
+  <p>If $f$ is continuous on a contour $C$ of length $L$, and $|f(z)| \le M$ for every $z$ on $C$, then:</p>
+  <p>$$\boxed{\;\left|\int_C f(z)\,dz\right| \;\le\; M \cdot L\;}$$</p>
+  <p>The recipe to use it has three steps:</p>
+  <ol style="line-height: 1.7">
+    <li>Find an upper bound $M$ for $|f(z)|$ on $C$.</li>
+    <li>Compute the length $L$ of $C$.</li>
+    <li>Multiply: $|{\textstyle\int}| \le M\,L$.</li>
+  </ol>
+  <p style="color: var(--muted)">It's just the triangle inequality applied piecewise: every tiny
+     piece $f(z)\,dz$ has magnitude at most $M\,|dz|$, and integrating $|dz|$ along $C$ gives
+     the arclength $L$.</p>
+  <p style="color: var(--muted)">Heads up: the bound is rarely tight. The whole point is that
+     it's <i>easy</i>. We'll see at the end of this page that the bound here is about 12× looser
+     than the actual value — and that's totally fine.</p>
+</section>
+
+
+<!-- ────────── B. THE SEGMENT — INTERACTIVE ────────── -->
+<section class="card">
+  <h3>Step 1 · meet $C$</h3>
+  <h2>The line segment from $i$ to $1$</h2>
+  <p>Parameterize: $z(t) = (1-t)\,i + t\,(1) = t + i(1-t)$, &nbsp;$t \in [0, 1]$.
+     The segment lies on the line $x + y = 1$. Slide $t$ to walk along it.</p>
+  <div class="grid2">
+    <div>
+      <div class="canvas-host"><canvas id="p3seg" width="500" height="500"></canvas></div>
+      <div class="canvas-label">$z$-plane &nbsp;·&nbsp; the segment $C$ and its perpendicular distance to the origin</div>
+    </div>
+    <div>
+      <p><b>Geometric fact:</b> the closest point on $C$ to the origin is the foot of the
+         perpendicular from $0$ to the line $x+y=1$, namely $z=\tfrac12 + \tfrac12 i$. That distance
+         is $\tfrac{1}{\sqrt 2}$.</p>
+      <p>Try this: slide $t$ near $0.5$ and watch $|z|$ bottom out at $\tfrac{1}{\sqrt 2} \approx 0.707$.</p>
+      <input id="p3t" type="range" min="0" max="1000" value="500" style="margin-top: 4px"/>
+      <dl class="readout" style="margin-top: 12px">
+        <dt>$t$</dt>            <dd id="p3tlab">0.500</dd>
+        <dt>$z(t)$</dt>          <dd id="p3zlab" class="alt2">0.500 + 0.500 i</dd>
+        <dt>$|z(t)|$</dt>        <dd id="p3mlab">0.7071</dd>
+        <dt>$|1/z(t)^4|$</dt>    <dd id="p3flab" class="alt">4.0000</dd>
+      </dl>
+      <p style="margin-top: 14px; color: var(--muted)">Notice the readout: $|1/z^4|$ is largest
+         exactly when $|z|$ is smallest. Larger $|z|^4$ in the denominator means smaller $|1/z^4|$.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ────────── C. WHERE IS |1/z^4| MAX? ────────── -->
+<section class="card">
+  <h3>Step 2 · find $M$</h3>
+  <h2>$M = \max_{z \in C} |1/z^4|$</h2>
+  <p>$|1/z^4| = 1/|z|^4$. Maximizing $1/|z|^4$ means <b>minimizing</b> $|z|$. From the previous
+     panel, $\min_C |z| = 1/\sqrt{2}$, achieved at $t = 1/2$. Therefore:</p>
+  <p>$$M = \frac{1}{(1/\sqrt 2)^4} = \frac{1}{1/4} = 4.$$</p>
+  <div class="canvas-host">
+    <canvas id="p3graph" width="900" height="340"></canvas>
+  </div>
+  <div class="canvas-label">$|1/z(t)^4|$ as $t$ sweeps from $0$ to $1$ — peaks at $t = 1/2$ where $|z|$ is smallest</div>
+  <details style="margin-top: 14px">
+    <summary>Algebra check</summary>
+    <p>$|z(t)|^2 = t^2 + (1-t)^2 = 2t^2 - 2t + 1$. Set derivative to zero: $4t - 2 = 0$, so $t = 1/2$.
+       At $t = 1/2$: $|z|^2 = 1/2$, so $|z| = 1/\sqrt 2$ and $|z|^4 = 1/4$. Hence $\max|1/z^4| = 4$. ✓</p>
+  </details>
+</section>
+
+
+<!-- ────────── D. THE LENGTH ────────── -->
+<section class="card">
+  <h3>Step 3 · find $L$</h3>
+  <h2>$L = $ arclength of $C$</h2>
+  <p>For a straight segment, $L = $ distance between the endpoints:</p>
+  <p>$$L = |1 - i| = \sqrt{1^2 + 1^2} = \sqrt 2.$$</p>
+</section>
+
+
+<!-- ────────── E. COMBINE ────────── -->
+<section class="card ans-glow">
+  <h3>Step 4 · multiply</h3>
+  <h2>The proof, in one line</h2>
+  <p>$$\left|\int_C \frac{dz}{z^4}\right| \;\le\; M \cdot L \;=\; 4 \cdot \sqrt{2} \;=\; 4\sqrt{2}. \qquad \blacksquare$$</p>
+</section>
+
+
+<!-- ────────── F. HOW LOOSE? ────────── -->
+<section class="card">
+  <h3>Bonus · how tight is the bound?</h3>
+  <h2>Compute the actual integral and compare</h2>
+  <p>Since $1/z^4$ has antiderivative $-1/(3z^3)$, the integral is straightforward:</p>
+  <p>$$\int_C \frac{dz}{z^4}
+    = \left[-\frac{1}{3z^3}\right]_{z=i}^{z=1}
+    = -\frac{1}{3} - \left(-\frac{1}{3i^3}\right)
+    = -\frac{1}{3} + \frac{1}{3(-i)}
+    = -\frac{1}{3} + \frac{i}{3}.$$</p>
+  <p>Magnitude: $\left|-\tfrac13 + \tfrac{i}{3}\right| = \tfrac{\sqrt 2}{3} \approx 0.4714$.</p>
+  <p>So the actual value is way inside the allowed disk:</p>
+  <div class="grid2">
+    <div>
+      <div class="canvas-host"><canvas id="p3compare" width="500" height="500"></canvas></div>
+      <div class="canvas-label">green disk = ML bound (radius $4\sqrt 2$) &nbsp;·&nbsp; orange dot = actual integral</div>
+    </div>
+    <div>
+      <dl class="readout">
+        <dt>actual $\int$</dt>      <dd class="alt2">−0.3333 + 0.3333 i</dd>
+        <dt>$|\int|$</dt>           <dd class="alt2">$\sqrt 2/3 \approx 0.4714$</dd>
+        <dt>ML bound</dt>           <dd class="alt">$4\sqrt 2 \approx 5.6569$</dd>
+        <dt>looseness</dt>          <dd>$\approx 12\times$</dd>
+      </dl>
+      <p style="margin-top: 14px"><b>Takeaway.</b> ML is a sledgehammer — quick to swing, very
+         conservative. When you only need to prove convergence or a uniform bound, looseness
+         doesn't matter. When you need a tight estimate, you'll need a sharper tool (e.g. estimating
+         the actual integrand directly, or using a better-shaped contour).</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ────────── G. STEP-BY-STEP ────────── -->
+<section class="card">
+  <h3>The proof, step by step</h3>
+  <h2>Tap each step to reveal</h2>
+
+  <details class="reveal-step">
+    <summary>Step 1 — set up the parameterization (only for finding $L$ and $M$)</summary>
+    <p>$z(t) = t + i(1-t)$, $t \in [0,1]$. (We don't actually need this for the proof — only for
+       finding $M$ and $L$ — but it makes the geometry concrete.)</p>
+  </details>
+  <details class="reveal-step">
+    <summary>Step 2 — find $L = \sqrt 2$</summary>
+    <p>$L = |1 - i| = \sqrt 2$. (Distance between endpoints of a straight segment.)</p>
+  </details>
+  <details class="reveal-step">
+    <summary>Step 3 — find $\min_{z\in C} |z|$</summary>
+    <p>$|z(t)|^2 = 2t^2 - 2t + 1$, minimized at $t = 1/2$ where $|z|^2 = 1/2$.
+       So $\min|z| = 1/\sqrt 2$. Equivalently, $C$ lies on the line $x+y=1$, whose perpendicular
+       distance from the origin is $1/\sqrt 2$.</p>
+  </details>
+  <details class="reveal-step">
+    <summary>Step 4 — find $M = \max|1/z^4|$</summary>
+    <p>$|1/z^4| = 1/|z|^4$ is maximized where $|z|$ is minimized. So $M = 1/(1/\sqrt 2)^4 = 4$.</p>
+  </details>
+  <details class="reveal-step">
+    <summary>Step 5 — apply ML</summary>
+    <p>$\displaystyle\left|\int_C \frac{dz}{z^4}\right| \;\le\; M\cdot L \;=\; 4\cdot\sqrt 2 \;=\; 4\sqrt 2. \qquad\blacksquare$</p>
+  </details>
+</section>
+
+
+<!-- ────────── H. QUIZ ────────── -->
+<section class="card quiz-card">
+  <h3>Concept check · 5 questions</h3>
+  <h2>Test your understanding</h2>
+  <p style="color: var(--muted); margin: 4px 0 14px">Click an answer. Green = correct, red = wrong, explanation appears.</p>
+
+  <div class="quiz-q" data-correct="1">
+    <p class="q-text">1. The ML inequality says...</p>
+    <div class="quiz-options">
+      <button class="quiz-opt">$\bigl|\!\int_C f\,dz\bigr| = M \cdot L$</button>
+      <button class="quiz-opt">$\bigl|\!\int_C f\,dz\bigr| \le M \cdot L$</button>
+      <button class="quiz-opt">$\int_C f\,dz = M + L$</button>
+      <button class="quiz-opt">$\int_C f\,dz \ge M \cdot L$</button>
+    </div>
+    <p class="quiz-explain">It's a one-sided bound: the magnitude of the integral is at most
+      $M\cdot L$, where $M$ bounds $|f|$ on the contour and $L$ is the contour length.</p>
+  </div>
+
+  <div class="quiz-q" data-correct="0">
+    <p class="q-text">2. For the segment from $i$ to $1$, what is $\min_{z\in C}|z|$?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt">$1/\sqrt 2$</button>
+      <button class="quiz-opt">$1$</button>
+      <button class="quiz-opt">$0$</button>
+      <button class="quiz-opt">$\sqrt 2$</button>
+    </div>
+    <p class="quiz-explain">The segment lies on the line $x+y=1$. The closest point on this line
+      to the origin is the foot of the perpendicular: $(1/2,\,1/2)$, at distance $1/\sqrt 2$.</p>
+  </div>
+
+  <div class="quiz-q" data-correct="1">
+    <p class="q-text">3. The length of the segment from $i$ to $1$ is...</p>
+    <div class="quiz-options">
+      <button class="quiz-opt">$1$</button>
+      <button class="quiz-opt">$\sqrt 2$</button>
+      <button class="quiz-opt">$2$</button>
+      <button class="quiz-opt">$\pi$</button>
+    </div>
+    <p class="quiz-explain">$L = |1 - i| = \sqrt{1^2 + 1^2} = \sqrt 2$.</p>
+  </div>
+
+  <div class="quiz-q" data-correct="0">
+    <p class="q-text">4. To bound $|1/z^4|$ on $C$, why do we want the <i>min</i> of $|z|$ rather than the max?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt">$|z|$ is in the denominator, so $\max |1/z^4|$ comes from $\min |z|$</button>
+      <button class="quiz-opt">$z^4$ is always positive</button>
+      <button class="quiz-opt">$1/z$ is real on $C$</button>
+      <button class="quiz-opt">none of the above</button>
+    </div>
+    <p class="quiz-explain">$|1/z^4| = 1/|z|^4$. The function $x \mapsto 1/x^4$ is decreasing for
+      $x > 0$, so the smaller $|z|$ is, the larger $1/|z|^4$ is. We bound the integrand from above,
+      so we need the worst-case (largest) value of the integrand — which corresponds to the smallest $|z|$.</p>
+  </div>
+
+  <div class="quiz-q" data-correct="2">
+    <p class="q-text">5. The actual value of $\int_C dz/z^4$ has magnitude...</p>
+    <div class="quiz-options">
+      <button class="quiz-opt">exactly $4\sqrt 2$</button>
+      <button class="quiz-opt">larger than $4\sqrt 2$ (ML is wrong here)</button>
+      <button class="quiz-opt">$\sqrt 2/3 \approx 0.47$ — much smaller than the bound</button>
+      <button class="quiz-opt">zero by Cauchy's theorem</button>
+    </div>
+    <p class="quiz-explain">Antiderivative method: $\int = [-1/(3z^3)]_i^1 = -1/3 + i/3$. Magnitude
+      is $\sqrt 2/3$. The bound $4\sqrt 2$ is about 12× looser — that's normal. Cauchy's theorem
+      doesn't apply ($1/z^4$ has a pole at $0$, but more importantly $C$ isn't closed).</p>
+  </div>
+
+  <div class="quiz-score">
+    Score: <span class="qscore">0</span> / 5 &nbsp;·&nbsp; <span class="qmessage" style="color:var(--muted)">answer all five</span>
+  </div>
+</section>
+
+
+<!-- ────────── CHEAT SHEET ────────── -->
+<section class="card tight">
+  <h3>cheat sheet</h3>
+  <ul style="margin: 8px 0 4px; padding-left: 18px; line-height: 1.65">
+    <li>ML inequality: $\bigl|\!\int_C f\bigr| \le M \cdot L$, where $M = \max_C |f|$ and $L = $ length.</li>
+    <li>Closest point on a line $ax+by=c$ to the origin: distance $|c|/\sqrt{a^2+b^2}$.</li>
+    <li>For $C$: line $x+y=1$, distance $1/\sqrt 2$ ⇒ $\min |z| = 1/\sqrt 2$ ⇒ $M = \max|1/z^4| = 4$.</li>
+    <li>$L = |1-i| = \sqrt 2$, so $M\cdot L = 4\sqrt 2$.</li>
+    <li><b>Bound: $|\!\int_C dz/z^4| \le 4\sqrt 2 \approx 5.66$.</b> Actual value $\sqrt 2/3 \approx 0.47$.</li>
+  </ul>
+</section>
+
+</div><!-- /p3 -->
 
 </div>
 
@@ -2267,44 +2520,260 @@ function ziOf(re, im) {
 
 
 // ════════════════════════════════════════════════════════════════
-//  P2.E — QUIZ
+//  P3.A — SEGMENT VIZ + SLIDER
 // ════════════════════════════════════════════════════════════════
 (function () {
-  const questions = document.querySelectorAll(".quiz-q");
-  if (!questions.length) return;
-  const scoreEl = document.getElementById("qscore");
-  const messageEl = document.getElementById("qmessage");
-  const answered = new Set();
-  let correct = 0;
+  const cv = document.getElementById("p3seg");
+  if (!cv) return;
+  const ctx = cv.getContext("2d");
+  const W = cv.width, H = cv.height;
+  const slider = document.getElementById("p3t");
+  const tLab = document.getElementById("p3tlab");
+  const zLab = document.getElementById("p3zlab");
+  const mLab = document.getElementById("p3mlab");
+  const fLab = document.getElementById("p3flab");
 
-  questions.forEach((q, qi) => {
-    const correctIdx = +q.dataset.correct;
-    const opts = q.querySelectorAll(".quiz-opt");
-    const explain = q.querySelector(".quiz-explain");
-    opts.forEach((opt, oi) => {
-      opt.addEventListener("click", () => {
-        if (answered.has(qi)) return;
-        answered.add(qi);
-        if (oi === correctIdx) {
-          opt.classList.add("correct");
-          correct++;
-        } else {
-          opt.classList.add("wrong");
-          opts[correctIdx].classList.add("correct");
-        }
-        opts.forEach(o => { if (!o.classList.contains("correct") && !o.classList.contains("wrong"))
-          o.style.opacity = 0.5; });
-        explain.classList.add("show");
-        scoreEl.textContent = correct;
-        if (answered.size === questions.length) {
-          if (correct === questions.length) messageEl.textContent = "perfect score 🎉";
-          else if (correct >= 4) messageEl.textContent = "nicely done";
-          else if (correct >= 2) messageEl.textContent = "review the concepts above and try again";
-          else messageEl.textContent = "scroll up — the playground & step-by-step will help";
-          messageEl.style.color = correct >= 4 ? "var(--good)" : "var(--accent2)";
-        } else {
-          messageEl.textContent = `${questions.length - answered.size} to go`;
-        }
+  function draw(t) {
+    const ax = setupPlane(ctx, W, H, { scale: 200, reLabel: "Re z", imLabel: "Im z" });
+
+    // Extended dashed line x+y=1 (light, just for context)
+    ctx.strokeStyle = "#34466a"; ctx.setLineDash([3,5]); ctx.lineWidth = 1;
+    {
+      const [a, b] = ax.toPx(-0.5, 1.5);
+      const [c, d] = ax.toPx(1.5, -0.5);
+      ctx.beginPath(); ctx.moveTo(a, b); ctx.lineTo(c, d); ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#34466a"; ctx.font = "11px ui-monospace,Menlo,monospace";
+    {
+      const [a, b] = ax.toPx(1.4, -0.4);
+      ctx.fillText("line x + y = 1", a + 4, b + 4);
+    }
+
+    // The segment C
+    ctx.strokeStyle = "#6ea8ff"; ctx.lineWidth = 3;
+    const [px0, py0] = ax.toPx(0, 1);
+    const [px1, py1] = ax.toPx(1, 0);
+    ctx.beginPath(); ctx.moveTo(px0, py0); ctx.lineTo(px1, py1); ctx.stroke();
+
+    // direction arrow at midpoint
+    {
+      const mid = ax.toPx(0.5, 0.5);
+      ctx.fillStyle = "#6ea8ff";
+      ctx.save();
+      ctx.translate(mid[0], mid[1]);
+      ctx.rotate(Math.atan2(py1 - py0, px1 - px0));
+      ctx.beginPath();
+      ctx.moveTo(0, 0); ctx.lineTo(-9, 5); ctx.lineTo(-9, -5); ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
+
+    // origin
+    const [ox, oy] = ax.toPx(0, 0);
+    drawDot(ctx, ox, oy, 4, "#fff");
+    ctx.fillStyle = "#fff"; ctx.font = "11px ui-monospace,Menlo,monospace";
+    ctx.fillText("0", ox + 6, oy + 14);
+
+    // perpendicular to midpoint
+    const [mx, my] = ax.toPx(0.5, 0.5);
+    ctx.strokeStyle = "#ff6b6b"; ctx.setLineDash([3,5]); ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(mx, my); ctx.stroke();
+    ctx.setLineDash([]);
+    drawDot(ctx, mx, my, 4, "#ff6b6b");
+    ctx.fillStyle = "#ff6b6b"; ctx.font = "12px ui-monospace,Menlo,monospace";
+    ctx.fillText("1/√2 ≈ 0.707", (ox+mx)/2 + 8, (oy+my)/2 - 4);
+    ctx.fillText("min |z|", mx + 8, my - 8);
+
+    // endpoints
+    drawDot(ctx, px0, py0, 6, "#7ee787");
+    drawDot(ctx, px1, py1, 6, "#ffb86b");
+    ctx.fillStyle = "#cfd4df"; ctx.font = "12px ui-monospace,Menlo,monospace";
+    ctx.fillText("z = i", px0 + 8, py0 - 4);
+    ctx.fillText("z = 1", px1 + 8, py1 - 4);
+
+    // current point on C
+    const zr = t, zi = 1 - t;
+    const [pcx, pcy] = ax.toPx(zr, zi);
+    // line from origin to current point
+    ctx.strokeStyle = "rgba(255,184,107,0.55)"; ctx.setLineDash([3,5]); ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(pcx, pcy); ctx.stroke();
+    ctx.setLineDash([]);
+    drawDot(ctx, pcx, pcy, 7, "#ffb86b", "#1a1f2b");
+
+    // labels
+    if (tLab) tLab.textContent = t.toFixed(3);
+    if (zLab) zLab.textContent = fmtC(zr, zi, 3);
+    const m = Math.hypot(zr, zi);
+    if (mLab) mLab.textContent = m.toFixed(4);
+    const fmag = 1/(m*m*m*m);
+    if (fLab) fLab.textContent = fmag.toFixed(4);
+  }
+
+  slider.addEventListener("input", () => draw(+slider.value/1000));
+  draw(0.5);
+})();
+
+
+// ════════════════════════════════════════════════════════════════
+//  P3.B — |1/z^4| GRAPH
+// ════════════════════════════════════════════════════════════════
+(function () {
+  const cv = document.getElementById("p3graph");
+  if (!cv) return;
+  const ctx = cv.getContext("2d");
+  const W = cv.width, H = cv.height;
+
+  const padL = 70, padR = 40, padT = 30, padB = 50;
+  const x0 = padL, x1 = W - padR;
+  const y0 = padT, y1 = H - padB;
+  const yMax = 5;
+
+  function xOf(t) { return x0 + t * (x1 - x0); }
+  function yOf(v) { return y1 - (v / yMax) * (y1 - y0); }
+
+  ctx.fillStyle = "#11151d"; ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = "#3a4256"; ctx.lineWidth = 1.4;
+  ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x0, y1); ctx.lineTo(x1, y1); ctx.stroke();
+  ctx.fillStyle = "#8a93a6"; ctx.font = "12px ui-monospace,Menlo,monospace";
+  ctx.strokeStyle = "#1f2533";
+  for (let v = 0; v <= 5; v++) {
+    const y = yOf(v);
+    ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke();
+    ctx.fillText(String(v), x0 - 22, y + 4);
+  }
+  for (let i = 0; i <= 4; i++) {
+    const t = i/4;
+    const x = xOf(t);
+    ctx.beginPath(); ctx.moveTo(x, y0); ctx.lineTo(x, y1); ctx.stroke();
+    ctx.fillText(t.toFixed(2), x - 12, y1 + 18);
+  }
+  ctx.fillText("t", (x0+x1)/2, y1 + 38);
+  ctx.save();
+  ctx.translate(20, (y0+y1)/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.fillText("|1/z(t)^4|", -32, 0);
+  ctx.restore();
+
+  // M = 4 line
+  ctx.strokeStyle = "#7ee787"; ctx.lineWidth = 1.2; ctx.setLineDash([4,5]);
+  ctx.beginPath(); ctx.moveTo(x0, yOf(4)); ctx.lineTo(x1, yOf(4)); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = "#7ee787";
+  ctx.fillText("M = 4 (the bound for ML)", x1 - 220, yOf(4) - 8);
+
+  // value at endpoints = 1
+  ctx.strokeStyle = "rgba(110,168,255,0.4)"; ctx.lineWidth = 1; ctx.setLineDash([3,4]);
+  ctx.beginPath(); ctx.moveTo(x0, yOf(1)); ctx.lineTo(x1, yOf(1)); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = "rgba(110,168,255,0.7)";
+  ctx.fillText("|1/z|=1 at endpoints", x1 - 200, yOf(1) - 6);
+
+  // the curve
+  ctx.strokeStyle = "#ffb86b"; ctx.lineWidth = 3;
+  ctx.beginPath();
+  let started = false;
+  for (let i = 0; i <= 800; i++) {
+    const t = i/800;
+    const m2 = t*t + (1-t)*(1-t);
+    const v = 1/(m2*m2);
+    if (v <= yMax + 0.3) {
+      const x = xOf(t), y = yOf(v);
+      if (!started) { ctx.moveTo(x, y); started = true; }
+      else ctx.lineTo(x, y);
+    }
+  }
+  ctx.stroke();
+
+  // peak marker
+  drawDot(ctx, xOf(0.5), yOf(4), 6, "#ff6b6b", "#1a1f2b");
+  ctx.fillStyle = "#ff6b6b"; ctx.font = "12px ui-monospace,Menlo,monospace";
+  ctx.fillText("max at t = 1/2", xOf(0.5) + 12, yOf(4) - 12);
+})();
+
+
+// ════════════════════════════════════════════════════════════════
+//  P3.C — BOUND DISK vs ACTUAL INTEGRAL
+// ════════════════════════════════════════════════════════════════
+(function () {
+  const cv = document.getElementById("p3compare");
+  if (!cv) return;
+  const ctx = cv.getContext("2d");
+  const W = cv.width, H = cv.height;
+
+  // scale to fit the bound disk of radius 4√2
+  const ax = setupPlane(ctx, W, H, { scale: W/2 / 6.5, reLabel: "Re", imLabel: "Im" });
+
+  // bound disk
+  ctx.fillStyle = "rgba(126,231,135,0.10)";
+  ctx.strokeStyle = "#7ee787"; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(ax.cx, ax.cy, 4*Math.sqrt(2)*ax.scale, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = "#7ee787"; ctx.font = "12px ui-monospace,Menlo,monospace";
+  ctx.fillText("ML bound: |∫| ≤ 4√2 ≈ 5.657", 12, 22);
+
+  // actual answer dot at -1/3 + i/3
+  const ar = -1/3, ai = 1/3;
+  const [apx, apy] = ax.toPx(ar, ai);
+  // arrow from origin
+  drawArrow(ctx, ax.cx, ax.cy, apx - ax.cx, apy - ax.cy, "#ffb86b", 2.5, 7);
+  drawDot(ctx, apx, apy, 7, "#ffb86b", "#1a1f2b");
+  ctx.fillStyle = "#ffb86b"; ctx.font = "12px ui-monospace,Menlo,monospace";
+  ctx.fillText("actual ∫ = -1/3 + i/3", apx + 12, apy - 6);
+  ctx.fillText("|∫| = √2/3 ≈ 0.471", apx + 12, apy + 12);
+
+  // small reference circle showing |actual|
+  ctx.strokeStyle = "rgba(255,184,107,0.5)"; ctx.lineWidth = 1; ctx.setLineDash([3,4]);
+  ctx.beginPath(); ctx.arc(ax.cx, ax.cy, Math.sqrt(2)/3 * ax.scale, 0, TAU); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // looseness annotation
+  ctx.fillStyle = "#cfd4df"; ctx.font = "12px ui-monospace,Menlo,monospace";
+  ctx.fillText("ratio ≈ 12×", 12, 42);
+})();
+
+
+// ════════════════════════════════════════════════════════════════
+//  QUIZ — per-card, so each Problem's quiz is independent
+// ════════════════════════════════════════════════════════════════
+(function () {
+  document.querySelectorAll(".quiz-card").forEach(card => {
+    const questions = card.querySelectorAll(".quiz-q");
+    if (!questions.length) return;
+    const scoreEl = card.querySelector(".qscore");
+    const messageEl = card.querySelector(".qmessage");
+    const answered = new Set();
+    let correct = 0;
+
+    questions.forEach((q, qi) => {
+      const correctIdx = +q.dataset.correct;
+      const opts = q.querySelectorAll(".quiz-opt");
+      const explain = q.querySelector(".quiz-explain");
+      opts.forEach((opt, oi) => {
+        opt.addEventListener("click", () => {
+          if (answered.has(qi)) return;
+          answered.add(qi);
+          if (oi === correctIdx) {
+            opt.classList.add("correct");
+            correct++;
+          } else {
+            opt.classList.add("wrong");
+            opts[correctIdx].classList.add("correct");
+          }
+          opts.forEach(o => { if (!o.classList.contains("correct") && !o.classList.contains("wrong"))
+            o.style.opacity = 0.5; });
+          explain.classList.add("show");
+          if (scoreEl) scoreEl.textContent = correct;
+          if (messageEl) {
+            if (answered.size === questions.length) {
+              if (correct === questions.length) messageEl.textContent = "perfect score 🎉";
+              else if (correct >= 4) messageEl.textContent = "nicely done";
+              else if (correct >= 2) messageEl.textContent = "review the concepts above and try again";
+              else messageEl.textContent = "scroll up — the explanations will help";
+              messageEl.style.color = correct >= 4 ? "var(--good)" : "var(--accent2)";
+            } else {
+              messageEl.textContent = `${questions.length - answered.size} to go`;
+            }
+          }
+        });
       });
     });
   });
